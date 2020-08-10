@@ -36,7 +36,7 @@
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-one t)
+  (load-theme 'doom-nord t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -46,7 +46,7 @@
 (use-package mood-line
   :config
   (mood-line-mode))
-
+  
 (use-package display-line-numbers
   :straight (:type built-in)
   :hook
@@ -56,7 +56,8 @@
   :config
   (dashboard-setup-startup-hook))
 
-(setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+(set-frame-font
+ "-HBnP-scientifica-normal-normal-normal-*-11-*-*-*-*-0-iso10646-1")
 
 ;; Disable unuseful UI elements
 (menu-bar-mode -1)
@@ -68,10 +69,10 @@
   :config
   (evil-leader/set-leader "<SPC>")
   (evil-leader/set-key
-   "<SPC>"   'projectile-find-file
-   "sb" 'swiper
-   "ff"      'find-file
-   "fr"      'counsel-recentf)
+   "<SPC>" 'projectile-find-file
+   "sb"    'swiper
+   "ff"    'find-file
+   "fr"    'counsel-recentf)
   (global-evil-leader-mode))
 
 (use-package undo-tree
@@ -116,7 +117,7 @@
 
 ;; Customize faces for whitespace mode
 (custom-set-faces
- '(whitespace-indentation ((t (:background ""))))
+ '(whitespace-indentation ((t (:background "#"))))
  '(whitespace-space-after-tab ((t nil))))
 
 (custom-set-variables
@@ -124,7 +125,10 @@
 
 ;; Set up code completion and checking
 
-(use-package irony)
+(use-package irony
+  :hook
+  (c-mode     . irony-mode)
+  (irony-mode . irony-cdb-autosetup-compile-options))
 
 (use-package flycheck
   :init (global-flycheck-mode))
@@ -137,6 +141,8 @@
 (use-package company-irony)
 
 (use-package company-irony-c-headers)
+
+(use-package rtags)
 
 (eval-after-load 'flycheck
   '(add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
