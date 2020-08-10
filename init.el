@@ -1,5 +1,15 @@
-;; Install straight.el
+;; -*- lexical-binding: t; -*-
 
+;; Disable garbage collection to improve startup time
+(setq gc-cons-threshold most-positive-fixnum ; 2^61 bytes
+      gc-cons-percentage 0.6)
+ 
+(add-hook 'emacs-startup-hook
+  (lambda ()
+    (setq gc-cons-threshold 16777216 ; 16mb
+          gc-cons-percentage 0.1)))
+
+;; Install straight.el
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
@@ -29,14 +39,35 @@
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
 
-(setq menu-bar-mode -1)
+(use-package mood-line
+  :config
+  (mood-line-mode))
+
+(use-package display-line-numbers
+  :straight (:type built-in)
+  :hook
+  (prog-mode . display-line-numbers-mode))
+
+(use-package dashboard
+  :config
+  (setq dashboard-startup-banner 'logo)
+  (dashboard-setup-startup-hook))
+
+(setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+
+;; Disable unuseful UI elements
+(menu-bar-mode -1)
+(toggle-scroll-bar -1) 
+(scroll-bar-mode -1)
+(tool-bar-mode -1)
 
 (use-package evil-leader
   :config
   (evil-leader/set-leader "<SPC>")
   (evil-leader/set-key
-   "<SPC>" 'find-file
-   "f"     'find-file)
+   "<SPC>" 'projectile-find-file
+   "ff"    'find-file
+   "fr"    'counsel-recentf)
   (global-evil-leader-mode))
 
 (use-package undo-tree
@@ -47,16 +78,21 @@
   :config
   (evil-mode 1))
 
-(use-package selectrum
+(use-package ivy 
   :config
-  (selectrum-mode 1))
+  (ivy-mode 1)
+  (setq ivy-height 14))
 
-(use-package selectrum-prescient
+(use-package counsel
   :config
-  (selectrum-prescient-mode 1)
-  (prescient-persist-mode 1))
+  (counsel-mode 1))
 
+(use-package projectile
+  :config
+  (setq projectile-completion-system 'ivy))
+  
 ;; Set up indentation
 (setq-default indent-tabs-mode t)
 (setq-default tab-width 8)
 (defvaralias 'c-basic-offset 'tab-width)
+(setq backward-delete-char-untabify-method 'hungry)
