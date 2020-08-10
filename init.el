@@ -57,7 +57,7 @@
 
 ;; Disable unuseful UI elements
 (menu-bar-mode -1)
-(toggle-scroll-bar -1) 
+(toggle-scroll-bar -1)
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
 
@@ -78,7 +78,7 @@
   :config
   (evil-mode 1))
 
-(use-package ivy 
+(use-package ivy
   :config
   (ivy-mode 1)
   (setq ivy-height 14))
@@ -90,9 +90,28 @@
 (use-package projectile
   :config
   (setq projectile-completion-system 'ivy))
-  
+
+(electric-pair-mode 1)
+
 ;; Set up indentation
+(use-package smart-tabs-mode
+  :config
+  (smart-tabs-insinuate 'c))
+
 (setq-default indent-tabs-mode t)
 (setq-default tab-width 8)
 (defvaralias 'c-basic-offset 'tab-width)
 (setq backward-delete-char-untabify-method 'hungry)
+(setq-default electric-indent-inhibit t)
+;; Display a Pipe in tabs
+(setq whitespace-display-mappings
+  '((tab-mark 9 [124 9] [92 9])))
+(add-hook 'c-mode-hook 'whitespace-mode)
+
+;; Customize faces for whitespace mode
+(custom-set-faces
+ '(whitespace-indentation ((t (:background ""))))
+ '(whitespace-space-after-tab ((t nil))))
+
+(custom-set-variables
+ '(whitespace-line-column 100))

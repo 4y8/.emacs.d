@@ -11,3 +11,6 @@
 *.~undo-tree
 
 recentf
+
+#packages
+straight/
