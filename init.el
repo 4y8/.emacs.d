@@ -1,5 +1,9 @@
+;;; init.el --- My configuration
+;;; Commentary:
+
 ;; -*- lexical-binding: t; -*-
 
+;;; Code:
 ;; Disable garbage collection to improve startup time
 (setq gc-cons-threshold most-positive-fixnum ; 2^61 bytes
       gc-cons-percentage 0.6)
@@ -115,3 +119,27 @@
 
 (custom-set-variables
  '(whitespace-line-column 100))
+
+;; Set up code completion and checking
+
+(use-package irony)
+
+(use-package flycheck
+  :init (global-flycheck-mode))
+
+(use-package flycheck-irony)
+
+(use-package company
+  :hook
+  (prog-mode . company-mode))
+
+(use-package company-irony)
+(use-package company-irony-c-headers)
+
+(eval-after-load 'flycheck
+  '(add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
+
+(eval-after-load 'company
+  '(add-to-list 'company-backends '(company-irony-c-headers company-irony)))
+
+;;; init.el ends here
