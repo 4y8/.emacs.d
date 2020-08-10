@@ -54,7 +54,6 @@
 
 (use-package dashboard
   :config
-  (setq dashboard-startup-banner 'logo)
   (dashboard-setup-startup-hook))
 
 (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
@@ -69,9 +68,10 @@
   :config
   (evil-leader/set-leader "<SPC>")
   (evil-leader/set-key
-   "<SPC>" 'projectile-find-file
-   "ff"    'find-file
-   "fr"    'counsel-recentf)
+   "<SPC>"   'projectile-find-file
+   "sb" 'swiper
+   "ff"      'find-file
+   "fr"      'counsel-recentf)
   (global-evil-leader-mode))
 
 (use-package undo-tree
@@ -85,7 +85,8 @@
 (use-package ivy
   :config
   (ivy-mode 1)
-  (setq ivy-height 14))
+  :custom
+  (ivy-height 14))
 
 (use-package counsel
   :config
@@ -102,11 +103,12 @@
   :config
   (smart-tabs-insinuate 'c))
 
-(setq-default indent-tabs-mode t)
-(setq-default tab-width 8)
+(setq-default indent-tabs-mode t
+	      tab-width 8
+	      electric-indent-inhibit t)
 (defvaralias 'c-basic-offset 'tab-width)
 (setq backward-delete-char-untabify-method 'hungry)
-(setq-default electric-indent-inhibit t)
+
 ;; Display a Pipe in tabs
 (setq whitespace-display-mappings
   '((tab-mark 9 [124 9] [92 9])))
@@ -130,10 +132,10 @@
 (use-package flycheck-irony)
 
 (use-package company
-  :hook
-  (prog-mode . company-mode))
+  :hook (prog-mode . company-mode))
 
 (use-package company-irony)
+
 (use-package company-irony-c-headers)
 
 (eval-after-load 'flycheck
@@ -142,4 +144,13 @@
 (eval-after-load 'company
   '(add-to-list 'company-backends '(company-irony-c-headers company-irony)))
 
+;; Email, you have to set up the email yourself
+(use-package mu4e
+  :custom
+  (mu4e-maildir           "~/.mail")
+  (mu4e-sent-folder       "/INBOX.OUTBOX")
+  (mu4e-drafts-folder     "/INBOX.DRAFT")
+  (mu4e-trash-folder      "/INBOX.TRASH")
+  (mu4e-refile-folder     "/INBOX")
+  (mu4e-html2text-command "html2text"))
 ;;; init.el ends here
