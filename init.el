@@ -3,6 +3,7 @@
 
 ;; -*- lexical-binding: t; -*-
 
+
 ;;; Code:
 ;; Disable garbage collection to improve startup time
 (setq gc-cons-threshold most-positive-fixnum ; 2^61 bytes
@@ -53,6 +54,8 @@
   (prog-mode . display-line-numbers-mode))
 
 (use-package dashboard
+  :custom
+  (dashboard-show-shortcuts nil)
   :config
   (dashboard-setup-startup-hook))
 
@@ -175,6 +178,9 @@
 ;; Email, you have to set up the email yourself
 (use-package mu4e
   :commands mu4e
+  :bind (:map mu4e-headers-mode-map
+	      ("j" . mu4e-headers-next)
+	      ("k" . mu4e-headers-prev))
   :custom
   (mu4e-maildir           "~/.mail")
   (mu4e-sent-folder       "/INBOX.OUTBOX")
@@ -199,5 +205,29 @@
 
 (add-hook 'prog-mode-hook 'git-gutter-mode)
 
+;; El-patch
+(use-package el-patch)
+
+(el-patch-feature mood-line)
+(with-eval-after-load 'mood-line
+  (el-patch-defun mood-line--update-flycheck-segment (&optional status)
+    "Update `mood-line--flycheck-text' against the reported flycheck STATUS."
+    (setq mood-line--flycheck-text
+        (pcase status
+          ('finished (if flycheck-current-errors
+                         (let-alist (flycheck-count-errors flycheck-current-errors)
+                           (let ((sum (+ (or .error 0) (or .warning 0))))
+                             (propertize (concat
+					  (el-patch-swap "⚑ Issues: " "Issues: ")
+					  (number-to-string sum)
+					  "  ")
+                                         'face (if .error
+                                                   'mood-line-status-error
+                                                 'mood-line-status-warning))))
+                       (propertize "✔ Good  " 'face 'mood-line-status-success)))
+          ('running (propertize "Δ Checking  " 'face 'mood-line-status-info))
+          ('errored (propertize "✖ Error  " 'face 'mood-line-status-error))
+          ('interrupted (propertize "⏸ Paused  " 'face 'mood-line-status-neutral))
+          ('no-checker "")))))
 
 ;;; init.el ends here
