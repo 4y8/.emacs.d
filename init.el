@@ -46,10 +46,7 @@
   :config
   (mood-line-mode))
   
-(use-package display-line-numbers
-  :straight (:type built-in)
-  :hook
-  (prog-mode . display-line-numbers-mode))
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
 
 (use-package dashboard
   :custom
@@ -111,8 +108,6 @@
  '(whitespace-line-column 100))
 
 ;; Set up code completion and checking, for C
-(setq company-idle-delay 0.1
-      company-minimum-prefix-length 1)
 (use-package irony
   :hook
   (c-mode     . irony-mode)
@@ -121,23 +116,28 @@
 (use-package flycheck
   :init (global-flycheck-mode))
 
-(use-package flycheck-irony)
+(use-package flycheck-irony
+  :after flycheck
+  :hook (flycheck-mode . flycheck-irony-setup))
 
 (use-package company
   :hook (prog-mode . company-mode)
   :bind
   ("M-j" . 'company-select-next)
-  ("M-k" . 'company-select-previous))
+  ("M-k" . 'company-select-previous)
+  :custom
+  (company-idle-delay 0.1)
+  (company-minimum-prefix-length 1)
+  :config
+  (add-to-list 'company-backends '(merlin-company-backend
+                                  company-irony-c-headers
+                                  company-irony)))
 
-(use-package company-irony)
+(use-package company-irony
+  :after irony company)
 
-(use-package company-irony-c-headers)
-
-(eval-after-load 'flycheck
-  '(add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
-
-(eval-after-load 'company
-  '(add-to-list 'company-backends '(company-irony-c-headers company-irony)))
+(use-package company-irony-c-headers
+  :after irony company)
 
 ;; Set up code completion and checking, for Ocaml
 (use-package caml-mode
@@ -156,10 +156,7 @@
   (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share))
   (autoload 'merlin-mode "merlin" nil t nil)))
 
-(with-eval-after-load 'company
- (add-to-list 'company-backends 'merlin-company-backend))
-
-;; Email, you have to set up the email yourself
+;; Email, you have to set up the email address yourself
 (use-package mu4e
   :commands mu4e
   :bind (:map mu4e-headers-mode-map
@@ -178,6 +175,7 @@
 
 (use-package git-gutter-fringe)
 
+;; Taken from Doom emacs
 (setq-default fringes-outside-margins t)
 ;; thin fringe bitmaps
 (define-fringe-bitmap 'git-gutter-fr:added [224]
@@ -190,8 +188,8 @@
 (add-hook 'prog-mode-hook 'git-gutter-mode)
 
 ;; Key bindings
-
 (use-package evil-leader
+  :after evil
   :config
   (evil-leader/set-leader "<SPC>")
   (evil-leader/set-key
@@ -199,10 +197,14 @@
    "sb"    'swiper
    "ff"    'find-file
    "fr"    'counsel-recentf
+   "ec"    'counsel-flycheck
+   "cr"    'comment-region
+   "cc"    'comment-line
    "gc"    'magit-commit)
   (global-evil-leader-mode))
 
 (use-package undo-tree
+  :after evil
   :config
   (global-undo-tree-mode))
 
