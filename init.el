@@ -51,6 +51,8 @@
 (use-package dashboard
   :custom
   (dashboard-show-shortcuts nil)
+  (dashboard-items '((recents . 20)
+		     (projects . 8)))
   :config
   (dashboard-setup-startup-hook))
 
@@ -139,13 +141,10 @@
 (use-package company-irony-c-headers
   :after irony company)
 
-;; Set up code completion and checking, for Ocaml
-(use-package caml-mode
-  :hook
-  (caml-mode . merlin-mode))
-
+; Set up code completion and checking, for Ocaml
 (use-package tuareg
   :hook
+  (caml-mode . merlin-mode)
   (tuareg-mode . merlin-mode)
   :custom
   (tuareg-match-patterns-aligned t))
@@ -193,14 +192,16 @@
   :config
   (evil-leader/set-leader "<SPC>")
   (evil-leader/set-key
-   "<SPC>" 'projectile-find-file
-   "sb"    'swiper
-   "ff"    'find-file
-   "fr"    'counsel-recentf
-   "ec"    'counsel-flycheck
-   "cr"    'comment-region
-   "cc"    'comment-line
-   "gc"    'magit-commit)
+    "<SPC>" 'projectile-find-file
+    "sb"    'swiper
+    "ff"    'find-file
+    "fr"    'counsel-recentf
+    "ec"    'counsel-flycheck
+    "cr"    'comment-region
+    "cc"    'comment-line
+    "gc"    'magit-commit
+    "gp"    'magit-push
+    "p"     'projectile-command-map)
   (global-evil-leader-mode))
 
 (use-package undo-tree
@@ -211,6 +212,8 @@
 (use-package evil
   :config
   (evil-mode 1))
+
+(use-package vterm)
 
 ;; El-patch
 (use-package el-patch)
@@ -237,4 +240,15 @@
           ('interrupted (propertize "⏸ Paused  " 'face 'mood-line-status-neutral))
           ('no-checker "")))))
 
+;; Prescient completion
+(use-package prescient
+  :config (prescient-persist-mode 1))
+
+(use-package ivy-prescient
+  :after ivy counsel prescient
+  :config (ivy-prescient-mode 1))
+
+(use-package company-prescient
+  :after company prescient
+  :config (company-prescient-mode 1))
 ;;; init.el ends here
