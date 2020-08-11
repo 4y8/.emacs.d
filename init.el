@@ -3,6 +3,9 @@
 ;;
 ;;
 ;;; Code:
+;; Loads private settings
+(load "~/.emacs.d/private.el")
+
 ;; Disable garbage collection to improve startup time
 (setq gc-cons-threshold most-positive-fixnum ; 2^61 bytes
       gc-cons-percentage 0.6)
@@ -52,10 +55,10 @@
   :custom
   (dashboard-show-shortcuts nil)
   (dashboard-items '((recents . 20)
+                     (agenda . 5)
 		     (projects . 8)))
   :config
   (dashboard-setup-startup-hook))
-
 ; I like the scientifica font
 (set-frame-font
  "-HBnP-scientifica-normal-normal-normal-*-11-*-*-*-*-0-iso10646-1")
@@ -155,7 +158,7 @@
   (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share))
   (autoload 'merlin-mode "merlin" nil t nil)))
 
-;; Email, you have to set up the email address yourself
+;; Email, you have to set up the email address yourself in private.el
 (use-package mu4e
   :commands mu4e
   :bind (:map mu4e-headers-mode-map
@@ -167,6 +170,7 @@
   (mu4e-drafts-folder     "/INBOX.DRAFT")
   (mu4e-trash-folder      "/INBOX.TRASH")
   (mu4e-refile-folder     "/INBOX")
+  (smtpmail-smtp-user     user-mail-address)
   (mu4e-html2text-command "html2text"))
 
 ;; git
@@ -251,4 +255,8 @@
 (use-package company-prescient
   :after company prescient
   :config (company-prescient-mode 1))
+
+;; Elfeed RSS
+(use-package elfeed)
+
 ;;; init.el ends here
