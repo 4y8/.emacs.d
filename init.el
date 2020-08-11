@@ -1,9 +1,7 @@
-;;; init.el --- My configuration
+;;; init.el --- My configuration  -*- lexical-binding: t; -*-
 ;;; Commentary:
-
-;; -*- lexical-binding: t; -*-
-
-
+;;
+;;
 ;;; Code:
 ;; Disable garbage collection to improve startup time
 (setq gc-cons-threshold most-positive-fixnum ; 2^61 bytes
@@ -21,9 +19,9 @@
       (bootstrap-version 5))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
-	(url-retrieve-synchronously
-	 "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-	 'silent 'inhibit-cookies)
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
       (goto-char (point-max))
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
@@ -68,38 +66,21 @@
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
 
-(use-package evil-leader
-  :config
-  (evil-leader/set-leader "<SPC>")
-  (evil-leader/set-key
-   "<SPC>" 'projectile-find-file
-   "sb"    'swiper
-   "ff"    'find-file
-   "fr"    'counsel-recentf)
-  (global-evil-leader-mode))
-
-(use-package undo-tree
-  :config
-  (global-undo-tree-mode))
-
-(use-package evil
-  :config
-  (evil-mode 1))
-
 (use-package ivy
   :config
   (ivy-mode 1)
   :custom
-  (ivy-height 14))
+  (ivy-height 20))
 
 (use-package counsel
   :config
-  (counsel-mode 1))
+  (counsel-mode 1)
+  (setq ivy-initial-inputs-alist nil))
 
 (use-package projectile
   :commands project-find-file
-  :config
-  (setq projectile-completion-system 'ivy))
+  :custom
+  (projectile-completion-system 'ivy))
 
 (electric-pair-mode 1)
 
@@ -109,14 +90,16 @@
   (smart-tabs-insinuate 'c))
 
 (setq-default indent-tabs-mode t
-	      tab-width 8
-	      electric-indent-inhibit t)
+              tab-width 8
+              electric-indent-inhibit t)
+
 (defvaralias 'c-basic-offset 'tab-width)
 (setq backward-delete-char-untabify-method 'hungry)
 
 ;; Display a Pipe in tabs
 (setq whitespace-display-mappings
   '((tab-mark 9 [124 9] [92 9])))
+
 (add-hook 'c-mode-hook 'whitespace-mode)
 
 ;; Customize faces for whitespace mode
@@ -157,30 +140,31 @@
   '(add-to-list 'company-backends '(company-irony-c-headers company-irony)))
 
 ;; Set up code completion and checking, for Ocaml
+(use-package caml-mode
+  :hook
+  (caml-mode . merlin-mode))
+
 (use-package tuareg
+  :hook
+  (tuareg-mode . merlin-mode)
   :custom
-  (tuareg-match-patterns-aligned t)
-  (tuareg-prettify-symbols-full  t))
+  (tuareg-match-patterns-aligned t))
 
 ;; Set up Merlin
 (let ((opam-share (ignore-errors (car (process-lines "opam" "config" "var" "share")))))
  (when (and opam-share (file-directory-p opam-share))
   (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share))
-  (autoload 'merlin-mode "merlin" nil t nil)
-  (add-hook 'tuareg-mode-hook 'merlin-mode t)
-  (add-hook 'caml-mode-hook 'merlin-mode t)))
+  (autoload 'merlin-mode "merlin" nil t nil)))
 
 (with-eval-after-load 'company
  (add-to-list 'company-backends 'merlin-company-backend))
-
-(add-hook 'merlin-mode-hook 'company-mode)
 
 ;; Email, you have to set up the email yourself
 (use-package mu4e
   :commands mu4e
   :bind (:map mu4e-headers-mode-map
-	      ("j" . mu4e-headers-next)
-	      ("k" . mu4e-headers-prev))
+              ("j" . mu4e-headers-next)
+              ("k" . mu4e-headers-prev))
   :custom
   (mu4e-maildir           "~/.mail")
   (mu4e-sent-folder       "/INBOX.OUTBOX")
@@ -205,6 +189,27 @@
 
 (add-hook 'prog-mode-hook 'git-gutter-mode)
 
+;; Key bindings
+
+(use-package evil-leader
+  :config
+  (evil-leader/set-leader "<SPC>")
+  (evil-leader/set-key
+   "<SPC>" 'projectile-find-file
+   "sb"    'swiper
+   "ff"    'find-file
+   "fr"    'counsel-recentf
+   "gc"    'magit-commit)
+  (global-evil-leader-mode))
+
+(use-package undo-tree
+  :config
+  (global-undo-tree-mode))
+
+(use-package evil
+  :config
+  (evil-mode 1))
+
 ;; El-patch
 (use-package el-patch)
 
@@ -218,9 +223,9 @@
                          (let-alist (flycheck-count-errors flycheck-current-errors)
                            (let ((sum (+ (or .error 0) (or .warning 0))))
                              (propertize (concat
-					  (el-patch-swap "⚑ Issues: " "Issues: ")
-					  (number-to-string sum)
-					  "  ")
+                                          (el-patch-swap "⚑ Issues: " "Issues: ") ;; The '⚑' character doesn't work well with scientifica.
+                                          (number-to-string sum)
+                                          "  ")
                                          'face (if .error
                                                    'mood-line-status-error
                                                  'mood-line-status-warning))))
