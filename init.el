@@ -217,6 +217,18 @@
   :config
   (evil-mode 1))
 
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
+
+(global-set-key (kbd "<next>") '(lambda ()
+				   (interactive)
+				   (next-line 25)))
+
+(global-set-key (kbd "<prior>") '(lambda ()
+				   (interactive)
+				   (previous-line 25)))
+
+
 (use-package vterm)
 
 ;; El-patch
