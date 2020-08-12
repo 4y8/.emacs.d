@@ -9,4 +9,3 @@
   "config.org"
   user-emacs-directory))
 ;;; init.el ends here
-

@@ -4,6 +4,7 @@
   - [[#private-configuration][Private configuration]]
   - [[#performance][Performance]]
   - [[#package-management][Package management]]
+  - [[#security][Security]]
   - [[#miscellaneous][Miscellaneous]]
 - [[#aesthetic-changes][Aesthetic changes]]
   - [[#themes][Themes]]
@@ -68,6 +69,21 @@ default.
 #+BEGIN_SRC emacs-lisp
 (straight-use-package 'use-package)
 (setq straight-use-package-by-default t)
+#+END_SRC
+** Security
+First, make emacs verify all TLS connections.
+#+BEGIN_SRC emacs-lisp  
+(setq tls-checktrust t
+      gnutls-verify-error t)
+#+END_SRC
+Then, we give emacs the location of certificates.
+#+BEGIN_SRC emacs-lisp
+(let ((trustfile "/etc/ssl/certs/ca-certificates.crt"))
+  (setq tls-program
+      `(,(format  "gnutls-cli --x509cafile %s -p %%p %%h" trustfile)
+	,(format "openssl s_client -connect %%h:%%p -CAfile %s -no_ssl2 -ign_eof"
+                 trustfile)))
+  (setq gnutls-trustfiles (list trustfile)))
 #+END_SRC
 ** Miscellaneous
 Switch to utf-8 encoding.
@@ -485,6 +501,4 @@ is called.
   (mu4e-refile-folder     "/INBOX")
   (smtpmail-smtp-user     user-mail-address)
   (mu4e-html2text-command "html2text"))
-(use-package esup
-  :commands (esup))
 #+END_SRC
