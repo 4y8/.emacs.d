@@ -19,7 +19,11 @@
   - [[#languages][Languages]]
   - [[#git][Git]]
 - [[#keybindings][Keybindings]]
+  - [[#evil][Evil]]
+  - [[#other][Other]]
 - [[#media][Media]]
+  - [[#elfeed][Elfeed]]
+  - [[#mu4e][Mu4e]]
 
 * Introduction
 ** Private configuration
@@ -58,7 +62,7 @@ We install the straight.el package manager [[https://github.com/raxod502/straigh
   (load bootstrap-file nil 'nomessage))
 #+END_SRC
 Then we install [[https://github.com/jwiegley/use-package][use-package]], to provide easier package configuration and
-installation. We also tell use-package to install packages from straight by
+installation. We also tell =use-package= to install packages from =straight= by
 default.
 #+BEGIN_SRC emacs-lisp
 (straight-use-package 'use-package)
@@ -387,11 +391,21 @@ This snippet is taken [[https://github.com/hlissner/doom-emacs][doom-emacs]] and
   nil nil 'bottom)
 #+END_SRC
 * Keybindings
+** Evil
 #+BEGIN_SRC emacs-lisp
 (use-package evil
+  :init
+  (setq evil-want-keybinding nil)
   :config
   (evil-mode 1))
-  
+#+END_SRC
+#+BEGIN_SRC emacs-lisp
+(use-package evil-collection
+  :after evil
+  :config
+  (evil-collection-init))
+#+END_SRC
+#+BEGIN_SRC emacs-lisp 
 (use-package evil-leader
   :after (evil)
   :config
@@ -410,29 +424,39 @@ This snippet is taken [[https://github.com/hlissner/doom-emacs][doom-emacs]] and
     "gs"    'magit-status
     "p"     'projectile-command-map)
   (global-evil-leader-mode))
-
+#+END_SRC
+#+BEGIN_SRC emacs-lisp
 (use-package undo-tree
   :after (evil)
   :config
   (global-undo-tree-mode))
-
-
+#+END_SRC
+** Other
+#+BEGIN_SRC emacs-lisp
 (global-set-key (kbd "<next>") '(lambda ()
 				   (interactive)
-				   (next-line 25)))
+				   (next-line 40)))
 
 (global-set-key (kbd "<prior>") '(lambda ()
 				   (interactive)
-				   (previous-line 25)))
+				   (previous-line 40)))
 #+END_SRC
 * Media
+** Elfeed
+[[https://github.com/skeeto/elfeed][Elfeed]] is a feed reader supporting Atom and RSS feeds. Feeds are set in the
+=private.el= file in a list named =elfeed-feeds=. 
 #+BEGIN_SRC emacs-lisp
-(use-package elfeed)
+(use-package elfeed
+  :commands elfeed)
+#+END_SRC
+** Mu4e
+[[https://github.com/djcb/mu][Mu4e]] is an email-client, you have to set the paths yourself since they are not
+the same for all email servers. The =html2text= program has to be installed
+since it provides better and faster html to text features, but you can remove
+the line if you don't want it. 
+#+BEGIN_SRC emacs-lisp
 (use-package mu4e
   :commands mu4e
-  :bind (:map mu4e-headers-mode-map
-              ("j" . mu4e-headers-next)
-              ("k" . mu4e-headers-prev))
   :custom
   (mu4e-maildir           "~/.mail")
   (mu4e-sent-folder       "/INBOX.OUTBOX")
@@ -441,6 +465,4 @@ This snippet is taken [[https://github.com/hlissner/doom-emacs][doom-emacs]] and
   (mu4e-refile-folder     "/INBOX")
   (smtpmail-smtp-user     user-mail-address)
   (mu4e-html2text-command "html2text"))
-
-
 #+END_SRC
