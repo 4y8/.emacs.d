@@ -169,21 +169,37 @@ persist option which allows history between different emacs sessions.
 * Programming
 ** Common
 *** Projectile
+We use the [[https://github.com/bbatsov/projectile][projectile]] package to get good project completion and tooling.
 #+BEGIN_SRC emacs-lisp
 (use-package projectile
   :commands project-find-file
   :custom
   (projectile-completion-system 'ivy))
-
 #+END_SRC
+*** Parentheses
+We use electric pair mode to get the corresponding delimiters when we type
+one. For instance '(' will also add a ')'.
+#+BEGIN_SRC emacs-lisp
+(electric-pair-mode 1)
+#+END_SRC
+We use the [[https://github.com/Fanael/rainbow-delimiters][rainbow-delimiters]] package to get matching parentheses and brackets
+of same colour.
+#+BEGIN_SRC emacs-lisp
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
+#+END_SRC
+*** Tabulation
 #+BEGIN_SRC emacs-lisp
 (use-package smart-tabs-mode
   :config
   (smart-tabs-insinuate 'c))
 
-(setq-default indent-tabs-mode t
-              tab-width 8
-              electric-indent-inhibit t)
+(setq tab-width 8
+      electric-indent-inhibit t)
+	      
+(add-hook 'emacs-lisp-mode-hook '(lambda () (setq indent-tabs-mode nil)))
+(add-hook 'tuareg-mode-hook     '(lambda () (setq indent-tabs-mode nil)))
+(add-hook 'c-mode-hook          '(lambda () (setq indent-tabs-mode t)))
 
 (defvaralias 'c-basic-offset 'tab-width)
 (setq backward-delete-char-untabify-method 'hungry)
@@ -306,10 +322,6 @@ persist option which allows history between different emacs sessions.
 (use-package evil
   :config
   (evil-mode 1))
-
-(use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode))
-(electric-pair-mode 1)
 
 (global-set-key (kbd "<next>") '(lambda ()
 				   (interactive)
