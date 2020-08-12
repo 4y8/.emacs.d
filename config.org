@@ -46,9 +46,10 @@ After startup, we set it back to a 16MB threshold.
           gc-cons-percentage 0.1)))
 #+END_SRC
 ** Package management
-We install the straight.el package manager [[https://github.com/raxod502/straight.el][straight.el]], package manager.
+We install the [[https://github.com/raxod502/straight.el][straight]] package manager, on the =develop= branch.
 #+BEGIN_SRC emacs-lisp
 (defvar bootstrap-version)
+(setq straight-repository-branch "develop") 
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
       (bootstrap-version 5))
@@ -327,7 +328,8 @@ it to align patterns in pattern matching.
 #+BEGIN_SRC emacs-lisp
 (use-package tuareg
   :custom
-  (tuareg-match-patterns-aligned t))
+  (tuareg-match-patterns-aligned t)
+  :mode "\\.ml\\'")
 #+END_SRC
 The [[https://github.com/ocaml/merlin][merlin]] package provides auto-completion, syntax-checking and type
 annotations for ocaml. We use with tuareg and add it to the list of company
@@ -374,7 +376,8 @@ tag, so we turn it in org files and load it after org-mode.
 *** Magit
 The [[https://github.com/magit/magit][magit]] package provides a wrapper upon most of often used git commands.
 #+BEGIN_SRC emacs-lisp
-(use-package magit)
+(use-package magit
+  :commands (magit-commit magit-push magit-status))
 #+END_SRC
 *** Git Gutter
 The [[https://github.com/emacsorphanage/git-gutter][git-gutter]] and [[https://github.com/emacsorphanage/git-gutter-fringe][git-gutter-fringe]] packages provide a nice visual indicator in
@@ -482,4 +485,6 @@ is called.
   (mu4e-refile-folder     "/INBOX")
   (smtpmail-smtp-user     user-mail-address)
   (mu4e-html2text-command "html2text"))
+(use-package esup
+  :commands (esup))
 #+END_SRC
