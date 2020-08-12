@@ -189,96 +189,101 @@ of same colour.
   :hook (prog-mode . rainbow-delimiters-mode))
 #+END_SRC
 *** Tabulation
+Set up the tabulation width and the default style in c.
+#+BEGIN_SRC emacs-lisp
+(setq tab-width 8
+      electric-indent-inhibit t
+      c-default-style "bsd"
+      c-basic-offset tab-width)
+#+END_SRC
+Make backspace delete a full tab instead of a space at a time.
+#+BEGIN_SRC emacs-lisp
+(setq backward-delete-char-untabify-method 'hungry)
+#+END_SRC
+Only use tabs in c mode, and use spaces in other programming languages.
+#+BEGIN_SRC emacs-lisp
+(add-hook 'emacs-lisp-mode-hook '(lambda () (setq indent-tabs-mode nil)))
+(add-hook 'tuareg-mode-hook     '(lambda () (setq indent-tabs-mode nil)))
+(add-hook 'c-mode-hook          '(lambda () (setq indent-tabs-mode t)))
+#+END_SRC
+The [[https://github.com/jcsalomon/smarttabs][smart tabs]] package allows us to use tabs for code blocks and spaces to align
+things like tables and arguments, so we enable it in c mode.
 #+BEGIN_SRC emacs-lisp
 (use-package smart-tabs-mode
   :config
   (smart-tabs-insinuate 'c))
-
-(setq tab-width 8
-      electric-indent-inhibit t)
-	      
-(add-hook 'emacs-lisp-mode-hook '(lambda () (setq indent-tabs-mode nil)))
-(add-hook 'tuareg-mode-hook     '(lambda () (setq indent-tabs-mode nil)))
-(add-hook 'c-mode-hook          '(lambda () (setq indent-tabs-mode t)))
-
-(defvaralias 'c-basic-offset 'tab-width)
-(setq backward-delete-char-untabify-method 'hungry)
-
-;; Display a Pipe in tabs
-(setq whitespace-display-mappings
-  '((tab-mark 9 [124 9] [92 9])))
-
-(add-hook 'c-mode-hook 'whitespace-mode)
-
-;; Customize faces for whitespace mode
-(custom-set-faces
- '(whitespace-indentation ((t (:background "#"))))
- '(whitespace-space-after-tab ((t nil))))
-
-(custom-set-variables
- '(whitespace-line-column 100))
-
-;; Set up code completion and checking, for C
-(use-package irony
-  :hook
-  (c-mode     . irony-mode)
-  (irony-mode . irony-cdb-autosetup-compile-options))
-
+#+END_SRC
+*** Flycheck
+The [[https://github.com/flycheck/flycheck][flycheck]] package provides on the fly syntax cheking. We enable it in all
+buffers.
+#+BEGIN_SRC emacs-lisp
 (use-package flycheck
   :init (global-flycheck-mode))
-
-(use-package flycheck-irony
-  :after flycheck
-  :hook (flycheck-mode . flycheck-irony-setup))
-
+#+END_SRC
+*** Company
+The [[https://github.com/company-mode/company-mode][company]] package provides in buffer auto-completion. We tell it to start
+completing from the first character and provide keybindings to move in
+suggestions without moving from the home row. We activate it in programming
+modes and in org-mode.
+#+BEGIN_SRC emacs-lisp
 (use-package company
-  :hook (prog-mode . company-mode)
+  :hook 
+  (prog-mode . company-mode)
+  (org-mode  . company-mode)
   :bind
   ("M-j" . 'company-select-next)
   ("M-k" . 'company-select-previous)
   :custom
   (company-idle-delay 0.1)
-  (company-minimum-prefix-length 1)
-  :config
-  (add-to-list 'company-backends '(merlin-company-backend
-                                  company-irony-c-headers
-                                  company-irony)))
+  (company-minimum-prefix-length 1))
+#+END_SRC
+** Languages
+*** C
+#+BEGIN_SRC emacs-lisp
+(use-package irony
+  :hook
+  (c-mode     . irony-mode)
+  (irony-mode . irony-cdb-autosetup-compile-options))
+
+(use-package flycheck-irony
+  :after flycheck
+  :hook (flycheck-mode . flycheck-irony-setup))
 
 (use-package company-irony
-  :after irony company)
+  :after irony company
+  :config
+  (add-to-list 'company-backends 'company-irony))
 
 (use-package company-irony-c-headers
-  :after irony company)
+  :after irony company
+  :config (add-to-list 'company-backends 'company-irony-c-headers))
 
-; Set up code completion and checking, for Ocaml
 (use-package tuareg
-  :hook
-  (caml-mode . merlin-mode)
-  (tuareg-mode . merlin-mode)
   :custom
   (tuareg-match-patterns-aligned t))
+  
+(use-package merlin
+  :after tuareg company
+  :config
+  (add-to-list 'company-backends 'merlin-company-backend)
+  :hook
+  (caml-mode . merlin-mode)
+  (tuareg-mode . merlin-mode))
 
-;; Set up Merlin
-(let ((opam-share (ignore-errors (car (process-lines "opam" "config" "var" "share")))))
- (when (and opam-share (file-directory-p opam-share))
-  (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share))
-  (autoload 'merlin-mode "merlin" nil t nil)))
-
-;; Email, you have to set up the email address yourself in private.el
-(use-package mu4e
-  :commands mu4e
-  :bind (:map mu4e-headers-mode-map
-              ("j" . mu4e-headers-next)
-              ("k" . mu4e-headers-prev))
+(use-package merlin-eldoc
+  :hook ((tuareg-mode caml-mode) . merlin-eldoc-setup)
   :custom
-  (mu4e-maildir           "~/.mail")
-  (mu4e-sent-folder       "/INBOX.OUTBOX")
-  (mu4e-drafts-folder     "/INBOX.DRAFT")
-  (mu4e-trash-folder      "/INBOX.TRASH")
-  (mu4e-refile-folder     "/INBOX")
-  (smtpmail-smtp-user     user-mail-address)
-  (mu4e-html2text-command "html2text"))
-
+  (eldoc-echo-area-use-multiline-p t)
+  (merlin-eldoc-max-lines 6))
+  
+(use-package flycheck-ocaml
+  :after merlin
+  :config
+  (setq merlin-error-after-save nil)
+  (flycheck-ocaml-setup))
+#+END_SRC
+** Git
+#+BEGIN_SRC emacs-lisp
 (use-package magit)
 
 (use-package git-gutter-fringe)
@@ -294,8 +299,9 @@ of same colour.
   nil nil 'bottom)
 
 (add-hook 'prog-mode-hook 'git-gutter-mode)
-
-;; Key bindings
+#+END_SRC
+* Keybindings
+#+BEGIN_SRC emacs-lisp
 (use-package evil-leader
   :after evil
   :config
@@ -330,5 +336,23 @@ of same colour.
 (global-set-key (kbd "<prior>") '(lambda ()
 				   (interactive)
 				   (previous-line 25)))
+#+END_SRC
+* Media
+#+BEGIN_SRC emacs-lisp
 (use-package elfeed)
+(use-package mu4e
+  :commands mu4e
+  :bind (:map mu4e-headers-mode-map
+              ("j" . mu4e-headers-next)
+              ("k" . mu4e-headers-prev))
+  :custom
+  (mu4e-maildir           "~/.mail")
+  (mu4e-sent-folder       "/INBOX.OUTBOX")
+  (mu4e-drafts-folder     "/INBOX.DRAFT")
+  (mu4e-trash-folder      "/INBOX.TRASH")
+  (mu4e-refile-folder     "/INBOX")
+  (smtpmail-smtp-user     user-mail-address)
+  (mu4e-html2text-command "html2text"))
+
+
 #+END_SRC
