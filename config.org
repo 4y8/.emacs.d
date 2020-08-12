@@ -1,21 +1,26 @@
-;;; init.el --- My configuration  -*- lexical-binding: t; -*-
-;;; Commentary:
-;;
-;;
-;;; Code:
-;; Loads private settings
+#+TITLE: config
+* Introduction
+First of all, wa load the private config that you have to set yourself, in your
+own private.el. You have to set up the user mail address and elfeed feeds.
+#+BEGIN_SRC emacs-lisp
 (load "~/.emacs.d/private.el")
-
-;; Disable garbage collection to improve startup time
-(setq gc-cons-threshold most-positive-fixnum ; 2^61 bytes
+#+END_SRC
+** Performance
+We disable the garbage collector at launch time to improve performances.
+#+BEGIN_SRC emacs-lisp
+(setq gc-cons-threshold most-positive-fixnum
       gc-cons-percentage 0.6)
- 
+#+END_SRC
+After startup, we set it back to a 16MB threshold.
+#+BEGIN_SRC emacs-lisp
 (add-hook 'emacs-startup-hook
   (lambda ()
-    (setq gc-cons-threshold 16777216 ; 16mb
+    (setq gc-cons-threshold 16777216
           gc-cons-percentage 0.1)))
-
-;; Install straight.el
+#+END_SRC
+** Package management
+We install the straight.el package manager [[https://github.com/raxod502/straight.el][straight.el]], package manager.
+#+BEGIN_SRC emacs-lisp
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
@@ -28,16 +33,20 @@
       (goto-char (point-max))
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
-
+#+END_SRC
+Then we install [[https://github.com/jwiegley/use-package][use-package]], to provide easier package configuration and
+installation. We also tell use-package to install packages from straight by
+default.
+#+BEGIN_SRC emacs-lisp
 (straight-use-package 'use-package)
 (setq straight-use-package-by-default t)
-
-;; Aesthetic changes
+#+END_SRC
+* Aesthetic changes
+#+BEGIN_SRC emacs-lisp
 (use-package doom-themes
   :config
-  ;; Global settings (defaults)
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (setq doom-themes-enable-bold t    
+        doom-themes-enable-italic t)
   (load-theme 'doom-nord t)
 
   ;; Enable flashing mode-line on errors
@@ -269,5 +278,4 @@
 
 ;; Elfeed RSS
 (use-package elfeed)
-
-;;; init.el ends here
+#+END_SRC
