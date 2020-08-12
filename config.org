@@ -53,8 +53,8 @@ Use y/n prompts instead of yes/no ones.
 #+END_SRC
 * Aesthetic changes
 ** Themes
-Install doom themes, enable italic and bold fonts and enable the
-nord theme. And enable org-mode's fontification. 
+Install doom themes, enable italic and bold fonts and enable the nord theme. And
+enable org-mode's fontification.
 #+BEGIN_SRC emacs-lisp
 (use-package doom-themes
   :config
@@ -65,17 +65,17 @@ nord theme. And enable org-mode's fontification.
   (doom-themes-org-config))
 #+END_SRC
 ** Bar
-We use the mood-line, which is a [[https://github.com/hlissner/emacs-doom-themes][doom-modeline]] inspired bar, based on
-the original emacs bar.
+We use the mood-line, which is a [[https://github.com/hlissner/emacs-doom-themes][doom-modeline]] inspired bar, based on the
+original emacs bar and add the time in the bar.
 #+BEGIN_SRC emacs-lisp
 (use-package mood-line
   :config
-  (mood-line-mode))
+  (mood-line-mode)
+  (display-time-mode))
 #+END_SRC
 *** Patch
-The '⚑' character, used for issues by the bar, doesn't work well with
-the font I use. So we use the [[https://github.com/raxod502/el-patch][el-patch]] package which allows to patch
-the bar.
+The '⚑' character, used for issues by the bar, doesn't work well with the font I
+use. So we use the [[https://github.com/raxod502/el-patch][el-patch]] package which allows to patch the bar.
 #+BEGIN_SRC emacs-lisp
 (use-package el-patch)
 
@@ -102,8 +102,8 @@ the bar.
           ('no-checker "")))))
 #+END_SRC
 ** Dashboard
-We use the [[https://github.com/emacs-dashboard/emacs-dashboard][emacs-dashboard]] package which displays a nice home page
-with recent files, agenda items and projects.
+We use the [[https://github.com/emacs-dashboard/emacs-dashboard][emacs-dashboard]] package which displays a nice home page with recent
+files, agenda items and projects.
 #+BEGIN_SRC emacs-lisp
 (use-package dashboard
   :custom
@@ -115,34 +115,65 @@ with recent files, agenda items and projects.
   (dashboard-setup-startup-hook))
 #+END_SRC
 ** Miscellaneous
+*** Font
+I like the [[https://github.com/NerdyPepper/scientifica][scientifica]] font, you can use another font format, however I've had
+problems with this font in other formats.
 #+BEGIN_SRC emacs-lisp
 (set-frame-font
  "-HBnP-scientifica-normal-normal-normal-*-11-*-*-*-*-0-iso10646-1")
 #+END_SRC
+*** Redundant UI elements
+We disable unuseful UI elements.
 #+BEGIN_SRC emacs-lisp
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
-(add-hook 'prog-mode-hook 'display-line-numbers-mode)
 #+END_SRC
+*** Line numbers
+Enable line numbers in programming modes and org-mode.
+#+BEGIN_SRC emacs-lisp
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+(add-hook 'org-mode-hook  'display-line-numbers-mode)
+#+END_SRC
+* Completion
+** Ivy
+Install and enable the [[https://github.com/abo-abo/swiper][ivy]] completion engine, with a higher minibuffer than
+default.
 #+BEGIN_SRC emacs-lisp
 (use-package ivy
   :config
   (ivy-mode 1)
   :custom
   (ivy-height 20))
-
+#+END_SRC
+** Counsel
+The [[https://github.com/abo-abo/swiper][counsel]] package provides alternative commands for emacs builtin ones which
+uses ivy.
+#+BEGIN_SRC emacs-lisp
 (use-package counsel
   :config
   (counsel-mode 1)
   (setq ivy-initial-inputs-alist nil))
+#+END_SRC
+** Prescient
+We use the [[https://github.com/raxod502/prescient.el][prescient]] completion backend and force ivy to use it. We activate the
+persist option which allows history between different emacs sessions.
+#+BEGIN_SRC emacs-lisp
+(use-package prescient
+  :config (prescient-persist-mode 1))
 
+(use-package ivy-prescient
+  :after ivy counsel prescient
+  :config (ivy-prescient-mode 1))
+#+END_SRC
+* Programming
+** Common
+*** Projectile
+#+BEGIN_SRC emacs-lisp
 (use-package projectile
   :commands project-find-file
   :custom
   (projectile-completion-system 'ivy))
-
-(electric-pair-mode 1)
 
 #+END_SRC
 #+BEGIN_SRC emacs-lisp
@@ -257,6 +288,7 @@ with recent files, agenda items and projects.
     "<SPC>" 'projectile-find-file
     "sb"    'swiper
     "ff"    'find-file
+    "sb"    'counsel-switch-buffer
     "fr"    'counsel-recentf
     "ec"    'counsel-flycheck
     "cr"    'comment-region
@@ -277,6 +309,7 @@ with recent files, agenda items and projects.
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
+(electric-pair-mode 1)
 
 (global-set-key (kbd "<next>") '(lambda ()
 				   (interactive)
@@ -285,19 +318,5 @@ with recent files, agenda items and projects.
 (global-set-key (kbd "<prior>") '(lambda ()
 				   (interactive)
 				   (previous-line 25)))
-
-;; Prescient completion
-(use-package prescient
-  :config (prescient-persist-mode 1))
-
-(use-package ivy-prescient
-  :after ivy counsel prescient
-  :config (ivy-prescient-mode 1))
-
-(use-package company-prescient
-  :after company prescient
-  :config (company-prescient-mode 1))
-
-;; Elfeed RSS
 (use-package elfeed)
 #+END_SRC
