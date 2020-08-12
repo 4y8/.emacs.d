@@ -20,7 +20,7 @@
   - [[#git][Git]]
 - [[#keybindings][Keybindings]]
   - [[#evil][Evil]]
-  - [[#other][Other]]
+  - [[#general][General]]
 - [[#media][Media]]
   - [[#elfeed][Elfeed]]
   - [[#mu4e][Mu4e]]
@@ -392,6 +392,7 @@ This snippet is taken [[https://github.com/hlissner/doom-emacs][doom-emacs]] and
 #+END_SRC
 * Keybindings
 ** Evil
+The [[https://github.com/emacs-evil/evil][Evil]] package provides emulation for the main features of Vim.
 #+BEGIN_SRC emacs-lisp
 (use-package evil
   :init
@@ -399,31 +400,13 @@ This snippet is taken [[https://github.com/hlissner/doom-emacs][doom-emacs]] and
   :config
   (evil-mode 1))
 #+END_SRC
+The [[https://github.com/emacs-evil/evil-collection][Evil Collection]] package provides Vim emulation for packages not covered by
+Evil.
 #+BEGIN_SRC emacs-lisp
 (use-package evil-collection
-  :after evil
-  :config
-  (evil-collection-init))
-#+END_SRC
-#+BEGIN_SRC emacs-lisp 
-(use-package evil-leader
   :after (evil)
   :config
-  (evil-leader/set-leader "<SPC>")
-  (evil-leader/set-key
-    "<SPC>" 'projectile-find-file
-    "sb"    'swiper
-    "ff"    'find-file
-    "bb"    'counsel-switch-buffer
-    "fr"    'counsel-recentf
-    "ec"    'counsel-flycheck
-    "cr"    'comment-region
-    "cc"    'comment-line
-    "gc"    'magit-commit
-    "gp"    'magit-push
-    "gs"    'magit-status
-    "p"     'projectile-command-map)
-  (global-evil-leader-mode))
+  (evil-collection-init))
 #+END_SRC
 #+BEGIN_SRC emacs-lisp
 (use-package undo-tree
@@ -431,15 +414,42 @@ This snippet is taken [[https://github.com/hlissner/doom-emacs][doom-emacs]] and
   :config
   (global-undo-tree-mode))
 #+END_SRC
-** Other
+** General
+The [[https://github.com/noctuid/general.el][general]] package provides an easy way to bind keys and integrates well with
+evil. 
+#+BEGIN_SRC emacs-lisp 
+(use-package general)
+#+END_SRC
+We define some keybindings for often used commands. They all start with the
+prefix space, à la [[https://github.com/syl20bnr/spacemacs][spacemacs]]. We need to use the keymap =override= otherwise
+evil would bind the space key.
 #+BEGIN_SRC emacs-lisp
-(global-set-key (kbd "<next>") '(lambda ()
-				   (interactive)
-				   (next-line 40)))
-
-(global-set-key (kbd "<prior>") '(lambda ()
-				   (interactive)
-				   (previous-line 40)))
+(general-define-key
+  :prefix "SPC"
+  :states 'normal
+  :keymaps 'override
+  "SPC" 'projectile-find-file
+  "sb"  'swiper
+  "ff"  'find-file
+  "bb"  'counsel-switch-buffer
+  "fr"  'counsel-recentf
+  "ec"  'counsel-flycheck
+  "cr"  'comment-region
+  "cc"  'comment-line
+  "gc"  'magit-commit
+  "gp"  'magit-push
+  "gs"  'magit-status
+  "p"   'projectile-command-map)
+#+END_SRC
+We add some keys for full sized keyboards.
+#+BEGIN_SRC emacs-lisp
+(general-define-key 
+  "<next>"  '(lambda ()
+              (interactive)
+	      (next-line 40))
+  "<prior>" '(lambda ()
+              (interactive)
+	      (previous-line 40)))
 #+END_SRC
 * Media
 ** Elfeed
