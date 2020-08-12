@@ -114,6 +114,10 @@ files, agenda items and projects.
   :config
   (dashboard-setup-startup-hook))
 #+END_SRC
+To get dashboard when using =emacsclient -c=, we need the following line:
+#+BEGIN_SRC emacs-lisp
+(setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+#+END_SRC
 ** Miscellaneous
 *** Font
 I like the [[https://github.com/NerdyPepper/scientifica][scientifica]] font, you can use another font format, however I've had
@@ -121,6 +125,11 @@ problems with this font in other formats.
 #+BEGIN_SRC emacs-lisp
 (set-frame-font
  "-HBnP-scientifica-normal-normal-normal-*-11-*-*-*-*-0-iso10646-1")
+#+END_SRC
+However, this won't work with =emacsclient -c= so we need this:
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'default-frame-alist
+             '(font . "-HBnP-scientifica-normal-normal-normal-*-11-*-*-*-*-0-iso10646-1"))
 #+END_SRC
 *** Redundant UI elements
 We disable unuseful UI elements.
@@ -163,7 +172,7 @@ persist option which allows history between different emacs sessions.
   :config (prescient-persist-mode 1))
 
 (use-package ivy-prescient
-  :after ivy counsel prescient
+  :after (ivy counsel prescient)
   :config (ivy-prescient-mode 1))
 #+END_SRC
 * Programming
@@ -239,48 +248,84 @@ modes and in org-mode.
 #+END_SRC
 ** Languages
 *** C
+The [[https://github.com/Sarcasm/irony-mode][irony-mode]] package provides auto-completion and syntax checking for C/C++
+based on libclang. So it needs to be installed using ~irony-install-server~. Of
+course we only enable it in c mode.
 #+BEGIN_SRC emacs-lisp
 (use-package irony
   :hook
   (c-mode     . irony-mode)
   (irony-mode . irony-cdb-autosetup-compile-options))
-
+#+END_SRC
+To get syntax checking with irony we use the irony backend of flycheck which we
+load after flycheck and irony and enable it when flycheck is enabled.
+#+BEGIN_SRC emacs-lisp
 (use-package flycheck-irony
-  :after flycheck
+  :after (flycheck irony)
   :hook (flycheck-mode . flycheck-irony-setup))
-
+#+END_SRC
+To get auto-completion with irony we use the irony backend of company and add a
+backend to get completion of headers name.
+#+BEGIN_SRC emacs-lisp
 (use-package company-irony
-  :after irony company
+  :after (irony company)
   :config
   (add-to-list 'company-backends 'company-irony))
 
 (use-package company-irony-c-headers
-  :after irony company
+  :after (irony company)
   :config (add-to-list 'company-backends 'company-irony-c-headers))
-
+#+END_SRC
+We can get documentation from c files using the irony backend of eldoc.
+#+BEGIN_SRC emacs-lisp
+  (use-package irony-eldoc
+    :after (irony)
+    :hook (irony-mode . irony-eldoc))
+#+END_SRC
+The [[https://github.com/ocaml/tuareg][tuareg]] package provides a REPL, syntax highlighting and a debugger. We tell
+it to align patterns in pattern matching.
+*** Ocaml
+#+BEGIN_SRC emacs-lisp
 (use-package tuareg
   :custom
   (tuareg-match-patterns-aligned t))
-  
+#+END_SRC
+The [[https://github.com/ocaml/merlin][merlin]] package provides auto-completion, syntax-checking and type
+annotations for ocaml. We use with tuareg and add it to the list of company
+backends.
+#+BEGIN_SRC emacs-lisp
 (use-package merlin
-  :after tuareg company
+  :after (tuareg company)
   :config
   (add-to-list 'company-backends 'merlin-company-backend)
   :hook
-  (caml-mode . merlin-mode)
-  (tuareg-mode . merlin-mode))
-
+  ((caml-mode tuareg-mode) . merlin-mode))
+#+END_SRC
+We can get documentation from ocaml files using the merlin backend of eldoc.
+#+BEGIN_SRC emacs-lisp
 (use-package merlin-eldoc
   :hook ((tuareg-mode caml-mode) . merlin-eldoc-setup)
   :custom
   (eldoc-echo-area-use-multiline-p t)
   (merlin-eldoc-max-lines 6))
-  
+#+END_SRC
+By default merlin uses flymake, however we use flycheck, so we disable its
+internal error reporting mechanism and replace it by a one which uses flycheck.
+#+BEGIN_SRC emacs-lisp
 (use-package flycheck-ocaml
-  :after merlin
+  :after (merlin)
   :config
   (setq merlin-error-after-save nil)
   (flycheck-ocaml-setup))
+#+END_SRC
+*** Org
+#+BEGIN_SRC emacs-lisp
+(use-package org
+  :custom (fill-column 80)
+  :hook (org-mode . auto-fill-mode))
+
+(use-package toc-org :after (org)
+  :hook (org-mode . toc-org-enable))
 #+END_SRC
 ** Git
 #+BEGIN_SRC emacs-lisp
@@ -302,15 +347,19 @@ modes and in org-mode.
 #+END_SRC
 * Keybindings
 #+BEGIN_SRC emacs-lisp
+(use-package evil
+  :config
+  (evil-mode 1))
+  
 (use-package evil-leader
-  :after evil
+  :after (evil)
   :config
   (evil-leader/set-leader "<SPC>")
   (evil-leader/set-key
     "<SPC>" 'projectile-find-file
     "sb"    'swiper
     "ff"    'find-file
-    "sb"    'counsel-switch-buffer
+    "bb"    'counsel-switch-buffer
     "fr"    'counsel-recentf
     "ec"    'counsel-flycheck
     "cr"    'comment-region
@@ -321,13 +370,10 @@ modes and in org-mode.
   (global-evil-leader-mode))
 
 (use-package undo-tree
-  :after evil
+  :after (evil)
   :config
   (global-undo-tree-mode))
 
-(use-package evil
-  :config
-  (evil-mode 1))
 
 (global-set-key (kbd "<next>") '(lambda ()
 				   (interactive)
