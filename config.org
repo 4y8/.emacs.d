@@ -1,5 +1,6 @@
-#+TITLE: config
+#+TITLE:My configuration 
 * Introduction
+** Private configuration
 First of all, wa load the private config that you have to set yourself, in your
 own private.el. You have to set up the user mail address and elfeed feeds.
 #+BEGIN_SRC emacs-lisp
@@ -41,25 +42,69 @@ default.
 (straight-use-package 'use-package)
 (setq straight-use-package-by-default t)
 #+END_SRC
+** Miscellaneous
+Switch to utf-8 encoding.
+#+BEGIN_SRC emacs-lisp
+(set-default-coding-systems 'utf-8)
+#+END_SRC
+Use y/n prompts instead of yes/no ones.
+#+BEGIN_SRC emacs-lisp
+(fset 'yes-or-no-p 'y-or-n-p)
+#+END_SRC
 * Aesthetic changes
+** Themes
+Install doom themes, enable italic and bold fonts and enable the
+nord theme. And enable org-mode's fontification. 
 #+BEGIN_SRC emacs-lisp
 (use-package doom-themes
   :config
   (setq doom-themes-enable-bold t    
         doom-themes-enable-italic t)
   (load-theme 'doom-nord t)
-
-  ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
-  ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
-
+#+END_SRC
+** Bar
+We use the mood-line, which is a [[https://github.com/hlissner/emacs-doom-themes][doom-modeline]] inspired bar, based on
+the original emacs bar.
+#+BEGIN_SRC emacs-lisp
 (use-package mood-line
   :config
   (mood-line-mode))
-  
-(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+#+END_SRC
+*** Patch
+The '⚑' character, used for issues by the bar, doesn't work well with
+the font I use. So we use the [[https://github.com/raxod502/el-patch][el-patch]] package which allows to patch
+the bar.
+#+BEGIN_SRC emacs-lisp
+(use-package el-patch)
 
+(el-patch-feature mood-line)
+(with-eval-after-load 'mood-line
+  (el-patch-defun mood-line--update-flycheck-segment (&optional status)
+    "Update `mood-line--flycheck-text' against the reported flycheck STATUS."
+    (setq mood-line--flycheck-text
+        (pcase status
+          ('finished (if flycheck-current-errors
+                         (let-alist (flycheck-count-errors flycheck-current-errors)
+                           (let ((sum (+ (or .error 0) (or .warning 0))))
+                             (propertize (concat
+                                          (el-patch-swap "⚑ Issues: " "Issues: ")
+                                          (number-to-string sum)
+                                          "  ")
+                                         'face (if .error
+                                                   'mood-line-status-error
+                                                 'mood-line-status-warning))))
+                       (propertize "✔ Good  " 'face 'mood-line-status-success)))
+          ('running (propertize "Δ Checking  " 'face 'mood-line-status-info))
+          ('errored (propertize "✖ Error  " 'face 'mood-line-status-error))
+          ('interrupted (propertize "⏸ Paused  " 'face 'mood-line-status-neutral))
+          ('no-checker "")))))
+#+END_SRC
+** Dashboard
+We use the [[https://github.com/emacs-dashboard/emacs-dashboard][emacs-dashboard]] package which displays a nice home page
+with recent files, agenda items and projects.
+#+BEGIN_SRC emacs-lisp
 (use-package dashboard
   :custom
   (dashboard-show-shortcuts nil)
@@ -68,15 +113,19 @@ default.
 		     (projects . 8)))
   :config
   (dashboard-setup-startup-hook))
-; I like the scientifica font
+#+END_SRC
+** Miscellaneous
+#+BEGIN_SRC emacs-lisp
 (set-frame-font
  "-HBnP-scientifica-normal-normal-normal-*-11-*-*-*-*-0-iso10646-1")
-
-;; Disable unuseful UI elements
+#+END_SRC
+#+BEGIN_SRC emacs-lisp
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
-
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+#+END_SRC
+#+BEGIN_SRC emacs-lisp
 (use-package ivy
   :config
   (ivy-mode 1)
@@ -95,7 +144,8 @@ default.
 
 (electric-pair-mode 1)
 
-;; Set up indentation
+#+END_SRC
+#+BEGIN_SRC emacs-lisp
 (use-package smart-tabs-mode
   :config
   (smart-tabs-insinuate 'c))
@@ -182,7 +232,6 @@ default.
   (smtpmail-smtp-user     user-mail-address)
   (mu4e-html2text-command "html2text"))
 
-;; git
 (use-package magit)
 
 (use-package git-gutter-fringe)
@@ -236,33 +285,6 @@ default.
 (global-set-key (kbd "<prior>") '(lambda ()
 				   (interactive)
 				   (previous-line 25)))
-
-(use-package vterm)
-
-;; El-patch
-(use-package el-patch)
-
-(el-patch-feature mood-line)
-(with-eval-after-load 'mood-line
-  (el-patch-defun mood-line--update-flycheck-segment (&optional status)
-    "Update `mood-line--flycheck-text' against the reported flycheck STATUS."
-    (setq mood-line--flycheck-text
-        (pcase status
-          ('finished (if flycheck-current-errors
-                         (let-alist (flycheck-count-errors flycheck-current-errors)
-                           (let ((sum (+ (or .error 0) (or .warning 0))))
-                             (propertize (concat
-                                          (el-patch-swap "⚑ Issues: " "Issues: ") ;; The '⚑' character doesn't work well with scientifica.
-                                          (number-to-string sum)
-                                          "  ")
-                                         'face (if .error
-                                                   'mood-line-status-error
-                                                 'mood-line-status-warning))))
-                       (propertize "✔ Good  " 'face 'mood-line-status-success)))
-          ('running (propertize "Δ Checking  " 'face 'mood-line-status-info))
-          ('errored (propertize "✖ Error  " 'face 'mood-line-status-error))
-          ('interrupted (propertize "⏸ Paused  " 'face 'mood-line-status-neutral))
-          ('no-checker "")))))
 
 ;; Prescient completion
 (use-package prescient
