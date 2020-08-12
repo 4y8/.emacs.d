@@ -1,4 +1,26 @@
 #+TITLE:My configuration 
+* Table of Content                                                      :TOC:
+- [[#introduction][Introduction]]
+  - [[#private-configuration][Private configuration]]
+  - [[#performance][Performance]]
+  - [[#package-management][Package management]]
+  - [[#miscellaneous][Miscellaneous]]
+- [[#aesthetic-changes][Aesthetic changes]]
+  - [[#themes][Themes]]
+  - [[#bar][Bar]]
+  - [[#dashboard][Dashboard]]
+  - [[#miscellaneous-1][Miscellaneous]]
+- [[#completion][Completion]]
+  - [[#ivy][Ivy]]
+  - [[#counsel][Counsel]]
+  - [[#prescient][Prescient]]
+- [[#programming][Programming]]
+  - [[#common][Common]]
+  - [[#languages][Languages]]
+  - [[#git][Git]]
+- [[#keybindings][Keybindings]]
+- [[#media][Media]]
+
 * Introduction
 ** Private configuration
 First of all, wa load the private config that you have to set yourself, in your
@@ -112,6 +134,7 @@ files, agenda items and projects.
                      (agenda . 5)
 		     (projects . 8)))
   :config
+  (global-page-break-lines-mode)
   (dashboard-setup-startup-hook))
 #+END_SRC
 To get dashboard when using =emacsclient -c=, we need the following line:
@@ -246,6 +269,13 @@ modes and in org-mode.
   (company-idle-delay 0.1)
   (company-minimum-prefix-length 1))
 #+END_SRC
+We use the prescient integration with company to get better sorted
+auto-completion.
+#+BEGIN_SRC emacs-lisp
+(use-package company-prescient
+  :after (company prescient)
+  :config (company-prescient-mode))
+#+END_SRC
 ** Languages
 *** C
 The [[https://github.com/Sarcasm/irony-mode][irony-mode]] package provides auto-completion and syntax checking for C/C++
@@ -292,7 +322,7 @@ it to align patterns in pattern matching.
 #+END_SRC
 The [[https://github.com/ocaml/merlin][merlin]] package provides auto-completion, syntax-checking and type
 annotations for ocaml. We use with tuareg and add it to the list of company
-backends.
+backends, so we load it after these packages.
 #+BEGIN_SRC emacs-lisp
 (use-package merlin
   :after (tuareg company)
@@ -313,37 +343,48 @@ By default merlin uses flymake, however we use flycheck, so we disable its
 internal error reporting mechanism and replace it by a one which uses flycheck.
 #+BEGIN_SRC emacs-lisp
 (use-package flycheck-ocaml
-  :after (merlin)
+  :after (merlin flycheck)
   :config
   (setq merlin-error-after-save nil)
   (flycheck-ocaml-setup))
 #+END_SRC
 *** Org
+Unable auto fill in org mode to make paragraphs of 80 lines automaticlly.
 #+BEGIN_SRC emacs-lisp
 (use-package org
   :custom (fill-column 80)
   :hook (org-mode . auto-fill-mode))
-
+#+END_SRC
+The [[https://github.com/snosov1/toc-org][toc-org]] auto generates table of contents on the first outline with a =:TOC:=
+tag, so we turn it in org files and load it after org-mode.
+#+BEGIN_SRC emacs-lisp
 (use-package toc-org :after (org)
   :hook (org-mode . toc-org-enable))
 #+END_SRC
 ** Git
+*** Magit
+The [[https://github.com/magit/magit][magit]] package provides a wrapper upon most of often used git commands.
 #+BEGIN_SRC emacs-lisp
 (use-package magit)
-
+#+END_SRC
+*** Git Gutter
+The [[https://github.com/emacsorphanage/git-gutter][git-gutter]] and [[https://github.com/emacsorphanage/git-gutter-fringe][git-gutter-fringe]] packages provide a nice visual indicator in
+the fringe to see which lines are modified, added or deleted and not commited
+yet.  
+#+BEGIN_SRC emacs-lisp
+(use-package git-gutter
+  :hook (prog-mode . git-gutter-mode))
 (use-package git-gutter-fringe)
-
-;; Taken from Doom emacs
+#+END_SRC
+This snippet is taken [[https://github.com/hlissner/doom-emacs][doom-emacs]] and provides a nice bitmap fringe for git-gutter.
+#+BEGIN_SRC emacs-lisp
 (setq-default fringes-outside-margins t)
-;; thin fringe bitmaps
 (define-fringe-bitmap 'git-gutter-fr:added [224]
   nil nil '(center repeated))
 (define-fringe-bitmap 'git-gutter-fr:modified [224]
   nil nil '(center repeated))
 (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240]
   nil nil 'bottom)
-
-(add-hook 'prog-mode-hook 'git-gutter-mode)
 #+END_SRC
 * Keybindings
 #+BEGIN_SRC emacs-lisp
@@ -366,6 +407,7 @@ internal error reporting mechanism and replace it by a one which uses flycheck.
     "cc"    'comment-line
     "gc"    'magit-commit
     "gp"    'magit-push
+    "gs"    'magit-status
     "p"     'projectile-command-map)
   (global-evil-leader-mode))
 
