@@ -336,8 +336,11 @@ modes and in org-mode.
   :hook
   ((prog-mode org-mode) . company-mode)
   :bind
-  ("M-j" . 'company-select-next)
-  ("M-k" . 'company-select-previous)
+  (:map company-active-map
+  ("<tab>" . 'company-complete-selection)
+  ("M-l"   . 'company-complete-common)
+  ("M-j"   . 'company-select-next)
+  ("M-k"   . 'company-select-previous))
   :custom
   (company-idle-delay 0.1)
   (company-minimum-prefix-length 1))
@@ -498,7 +501,7 @@ The [[https://github.com/emacs-evil/evil][Evil]] package provides emulation for 
   (evil-mode 1))
 #+END_SRC
 The [[https://github.com/emacs-evil/evil-collection][Evil Collection]] package provides Vim emulation for packages not covered by
-Evil.
+Evil. We already modified company keybindings so we disable evil' one. 
 #+BEGIN_SRC emacs-lisp
 (use-package evil-collection
   :after (evil)
