@@ -14,6 +14,7 @@
   - [[#miscellaneous-1][Miscellaneous]]
 - [[#completion][Completion]]
   - [[#ivy][Ivy]]
+  - [[#swiper][Swiper]]
   - [[#counsel][Counsel]]
   - [[#prescient][Prescient]]
 - [[#programming][Programming]]
@@ -80,7 +81,7 @@ need straight to install it so we can't install it with other optimizations.
   :init
   (gcmh-mode 1))
 #+END_SRC
-The [[][esup] package provides an easy way to benchmark startup time.
+The [[https://github.com/jschaf/esup][esup]] package provides an easy way to benchmark startup time.
 #+BEGIN_SRC emacs-lisp
 (use-package esup
   :commands (esup))
@@ -205,7 +206,7 @@ Enable line numbers in programming modes and org-mode.
 #+END_SRC
 * Completion
 ** Ivy
-Install and enable the [[https://github.com/abo-abo/swiper][ivy]] completion engine, with a higher minibuffer than
+The [[https://github.com/abo-abo/swiper][ivy]] package provides a completion engine. We set a higher minibuffer than
 default.
 #+BEGIN_SRC emacs-lisp
 (use-package ivy
@@ -214,22 +215,33 @@ default.
   :custom
   (ivy-height 20))
 #+END_SRC
+** Swiper
+The [[https://github.com/abo-abo/swiper][swiper]] package provides an isearch alternative using ivy.
+#+BEGIN_SRC emacs-lisp
+(use-package swiper 
+  :commands (swiper))
+#+END_SRC
 ** Counsel
 The [[https://github.com/abo-abo/swiper][counsel]] package provides alternative commands for emacs builtin ones which
 uses ivy.
 #+BEGIN_SRC emacs-lisp
 (use-package counsel
+  :after (ivy)
+  :defer t
   :config
   (counsel-mode 1)
   (setq ivy-initial-inputs-alist nil))
 #+END_SRC
 ** Prescient
-We use the [[https://github.com/raxod502/prescient.el][prescient]] completion backend and force ivy to use it. We activate the
-persist option which allows history between different emacs sessions.
+We use the [[https://github.com/raxod502/prescient.el][prescient]] completion backend. We activate the persist option which
+allows history between different emacs sessions.
 #+BEGIN_SRC emacs-lisp
 (use-package prescient
+  :after (ivy company)
   :config (prescient-persist-mode 1))
-
+#+END_SRC
+We install the ivy backend of prescient.
+#+BEGIN_SRC emacs-lisp
 (use-package ivy-prescient
   :after (ivy counsel prescient)
   :config (ivy-prescient-mode 1))
@@ -316,7 +328,7 @@ auto-completion.
 ** Languages
 *** C
 The [[https://github.com/Sarcasm/irony-mode][irony-mode]] package provides auto-completion and syntax checking for C/C++
-based on libclang. So it needs to be installed using ~irony-install-server~. Of
+based on libclang. So it needs to be installed using =irony-install-server=. Of
 course we only enable it in c mode.
 #+BEGIN_SRC emacs-lisp
 (use-package irony
@@ -324,21 +336,23 @@ course we only enable it in c mode.
   (c-mode     . irony-mode)
   (irony-mode . irony-cdb-autosetup-compile-options))
 #+END_SRC
-To get syntax checking with irony we use the irony backend of flycheck which we
-load after flycheck and irony and enable it when flycheck is enabled.
+To get syntax checking with irony we use the [[https://github.com/Sarcasm/flycheck-irony][flycheck-irony]] backend of flycheck
+which we load after flycheck and irony and enable it when flycheck is enabled.
 #+BEGIN_SRC emacs-lisp
 (use-package flycheck-irony
   :after (flycheck irony)
   :hook (flycheck-mode . flycheck-irony-setup))
 #+END_SRC
-To get auto-completion with irony we use the irony backend of company and add a
-backend to get completion of headers name.
+To get auto-completion with irony we use the [[https://github.com/Sarcasm/company-irony][company-irony]] backend of company.
 #+BEGIN_SRC emacs-lisp
 (use-package company-irony
   :after (irony company)
   :config
   (add-to-list 'company-backends 'company-irony))
-
+#+END_SRC
+We also use the [[https://github.com/hotpxl/company-irony-c-headers][company-irony-c-headers]] of company to get completion of headers
+file.
+#+BEGIN_SRC emacs-lisp
 (use-package company-irony-c-headers
   :after (irony company)
   :config (add-to-list 'company-backends 'company-irony-c-headers))
@@ -349,9 +363,9 @@ We can get documentation from c files using the irony backend of eldoc.
     :after (irony)
     :hook (irony-mode . irony-eldoc))
 #+END_SRC
+*** Ocaml
 The [[https://github.com/ocaml/tuareg][tuareg]] package provides a REPL, syntax highlighting and a debugger. We tell
 it to align patterns in pattern matching.
-*** Ocaml
 #+BEGIN_SRC emacs-lisp
 (use-package tuareg
   :custom
@@ -387,16 +401,24 @@ internal error reporting mechanism and replace it by a one which uses flycheck.
   (flycheck-ocaml-setup))
 #+END_SRC
 *** Org
-Unable auto fill in org mode to make paragraphs of 80 lines automaticlly.
+Unable auto fill in org mode to make paragraphs of 80 lines automaticlly. We
+only load the =emacs-lisp= backend of literate programming with org-mode.
 #+BEGIN_SRC emacs-lisp
 (use-package org
-  :custom (fill-column 80)
-  :hook (org-mode . auto-fill-mode))
+  :custom 
+  (fill-column 80)
+  :hook 
+  (org-mode . auto-fill-mode)
+  :config
+  (org-babel-do-load-languages
+    'org-babel-load-languages
+    '((emacs-lisp . t))))
 #+END_SRC
 The [[https://github.com/snosov1/toc-org][toc-org]] auto generates table of contents on the first outline with a =:TOC:=
 tag, so we turn it in org files and load it after org-mode.
 #+BEGIN_SRC emacs-lisp
-(use-package toc-org :after (org)
+(use-package toc-org 
+  :after (org)
   :hook (org-mode . toc-org-enable))
 #+END_SRC
 ** Git
@@ -413,7 +435,9 @@ yet.
 #+BEGIN_SRC emacs-lisp
 (use-package git-gutter
   :hook ((prog-mode org-mode) . git-gutter-mode))
-(use-package git-gutter-fringe)
+
+(use-package git-gutter-fringe
+  :after (git-gutter))
 #+END_SRC
 This snippet is taken [[https://github.com/hlissner/doom-emacs][doom-emacs]] and provides a nice bitmap fringe for git-gutter.
 #+BEGIN_SRC emacs-lisp
@@ -496,7 +520,7 @@ We add some keys for full sized keyboards.
 the =elfeed= command is called.
 #+BEGIN_SRC emacs-lisp
 (use-package elfeed
-  :commands elfeed)
+  :commands (elfeed))
 #+END_SRC
 ** Mu4e
 [[https://github.com/djcb/mu][Mu4e]] is an email-client, you have to set the paths yourself since they are not
@@ -506,7 +530,7 @@ the line if you don't want it. We only load the package when the =mu4e= command
 is called.
 #+BEGIN_SRC emacs-lisp
 (use-package mu4e
-  :commands mu4e
+  :commands (mu4e)
   :custom
   (mu4e-maildir           "~/.mail")
   (mu4e-sent-folder       "/INBOX.OUTBOX")
