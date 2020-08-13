@@ -253,7 +253,7 @@ We install the ivy backend of prescient.
 We use the [[https://github.com/bbatsov/projectile][projectile]] package to get good project completion and tooling.
 #+BEGIN_SRC emacs-lisp
 (use-package projectile
-  :commands project-find-file
+  :commands (project-find-file)
   :custom
   (projectile-completion-system 'ivy))
 #+END_SRC
@@ -267,6 +267,7 @@ We use the [[https://github.com/Fanael/rainbow-delimiters][rainbow-delimiters]] 
 of same colour.
 #+BEGIN_SRC emacs-lisp
 (use-package rainbow-delimiters
+  :defer t
   :hook (prog-mode . rainbow-delimiters-mode))
 #+END_SRC
 *** Tabulation
@@ -334,6 +335,9 @@ modes and in org-mode.
 (use-package company
   :hook
   ((prog-mode org-mode) . company-mode)
+  :bind
+  ("M-j" . 'company-select-next)
+  ("M-k" . 'company-select-previous)
   :custom
   (company-idle-delay 0.1)
   (company-minimum-prefix-length 1))
@@ -347,6 +351,7 @@ auto-completion.
 #+END_SRC
 ** Languages
 *** C
+**** Irony
 The [[https://github.com/Sarcasm/irony-mode][irony-mode]] package provides auto-completion and syntax checking for C/C++
 based on libclang. So it needs to be installed using =irony-install-server=. Of
 course we only enable it in c mode.
@@ -382,6 +387,13 @@ We can get documentation from c files using the irony backend of eldoc.
   (use-package irony-eldoc
     :after (irony)
     :hook (irony-mode . irony-eldoc))
+#+END_SRC
+**** CMake
+The [[https://github.com/Lindydancer/cmake-font-lock/tree/9e0fcd1ee2cf316f661f2d652368b12f83a4ec9c][cmake-font-lock]] package provides advanced syntax highlighting for CMake
+files.
+#+BEGIN_SRC emacs-lisp
+(use-package cmake-font-lock
+  :mode ("\\.cmake\\'||CMakeLists.txt"))
 #+END_SRC
 *** Ocaml
 The [[https://github.com/ocaml/tuareg][tuareg]] package provides a REPL, syntax highlighting and a debugger. We tell
@@ -425,6 +437,7 @@ Unable auto fill in org mode to make paragraphs of 80 lines automaticlly. We
 only load the =emacs-lisp= backend of literate programming with org-mode.
 #+BEGIN_SRC emacs-lisp
 (use-package org
+  :defer t
   :custom 
   (fill-column 80)
   :hook 
@@ -489,6 +502,7 @@ Evil.
 #+BEGIN_SRC emacs-lisp
 (use-package evil-collection
   :after (evil)
+  :custom (evil-collection-company-use-tng nil)
   :config
   (evil-collection-init))
 #+END_SRC
