@@ -1,9 +1,10 @@
-#+TITLE:My configuration 
+#+TITLE:My configuration
 * Table of Content                                                      :TOC:
 - [[#introduction][Introduction]]
   - [[#private-configuration][Private configuration]]
-  - [[#performance][Performance]]
+  - [[#performance-12][Performance 1/2]]
   - [[#package-management][Package management]]
+  - [[#performance-22][Performance 2/2]]
   - [[#security][Security]]
   - [[#miscellaneous][Miscellaneous]]
 - [[#aesthetic-changes][Aesthetic changes]]
@@ -33,7 +34,7 @@ own private.el. You have to set up the user mail address and elfeed feeds.
 #+BEGIN_SRC emacs-lisp
 (load "~/.emacs.d/private.el")
 #+END_SRC
-** Performance
+** Performance 1/2
 We disable the garbage collector at launch time to improve performances.
 #+BEGIN_SRC emacs-lisp
 (setq gc-cons-threshold most-positive-fixnum
@@ -50,7 +51,7 @@ After startup, we set it back to a 16MB threshold.
 We install the [[https://github.com/raxod502/straight.el][straight]] package manager, on the =develop= branch.
 #+BEGIN_SRC emacs-lisp
 (defvar bootstrap-version)
-(setq straight-repository-branch "develop") 
+(setq straight-repository-branch "develop")
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
       (bootstrap-version 5))
@@ -70,9 +71,23 @@ default.
 (straight-use-package 'use-package)
 (setq straight-use-package-by-default t)
 #+END_SRC
+** Performance 2/2
+The [[https://gitlab.com/koral/gcmh][gcmh]] package provides more garbage collector related optimizations, but we
+need straight to install it so we can't install it with other optimizations.
+#+BEGIN_SRC emacs-lisp
+(use-package gcmh
+  :defer t
+  :init
+  (gcmh-mode 1))
+#+END_SRC
+The [[][esup] package provides an easy way to benchmark startup time.
+#+BEGIN_SRC emacs-lisp
+(use-package esup
+  :commands (esup))
+#+END_SRC
 ** Security
 First, make emacs verify all TLS connections.
-#+BEGIN_SRC emacs-lisp  
+#+BEGIN_SRC emacs-lisp
 (setq tls-checktrust t
       gnutls-verify-error t)
 #+END_SRC
@@ -81,7 +96,7 @@ Then, we give emacs the location of certificates.
 (let ((trustfile "/etc/ssl/certs/ca-certificates.crt"))
   (setq tls-program
       `(,(format  "gnutls-cli --x509cafile %s -p %%p %%h" trustfile)
-	,(format "openssl s_client -connect %%h:%%p -CAfile %s -no_ssl2 -ign_eof"
+        ,(format "openssl s_client -connect %%h:%%p -CAfile %s -no_ssl2 -ign_eof"
                  trustfile)))
   (setq gnutls-trustfiles (list trustfile)))
 #+END_SRC
@@ -101,7 +116,7 @@ enable org-mode's fontification.
 #+BEGIN_SRC emacs-lisp
 (use-package doom-themes
   :config
-  (setq doom-themes-enable-bold t    
+  (setq doom-themes-enable-bold t
         doom-themes-enable-italic t)
   (load-theme 'doom-nord t)
   (doom-themes-visual-bell-config)
@@ -153,7 +168,7 @@ files, agenda items and projects.
   (dashboard-show-shortcuts nil)
   (dashboard-items '((recents . 20)
                      (agenda . 5)
-		     (projects . 8)))
+                     (projects . 8)))
   :config
   (global-page-break-lines-mode)
   (dashboard-setup-startup-hook))
@@ -271,12 +286,12 @@ The [[https://github.com/flycheck/flycheck][flycheck]] package provides on the f
 buffers. The hook makes flycheck stop complaining about package presentation
 when checking a emacs-lisp block from org-mode.
 #+BEGIN_SRC emacs-lisp
-  (use-package flycheck
-    :init (global-flycheck-mode)
-    :hook
-    (org-src-mode . (lambda ()
-		      (setq-local flycheck-disabled-checkers
-				  '(emacs-lisp-checkdoc)))))
+(use-package flycheck
+  :init (global-flycheck-mode)
+  :hook
+  (org-src-mode . (lambda ()
+      (setq-local flycheck-disabled-checkers
+                  '(emacs-lisp-checkdoc)))))
 #+END_SRC
 *** Company
 The [[https://github.com/company-mode/company-mode][company]] package provides in buffer auto-completion. We tell it to start
@@ -285,12 +300,8 @@ suggestions without moving from the home row. We activate it in programming
 modes and in org-mode.
 #+BEGIN_SRC emacs-lisp
 (use-package company
-  :hook 
-  (prog-mode . company-mode)
-  (org-mode  . company-mode)
-  :bind
-  ("M-j" . 'company-select-next)
-  ("M-k" . 'company-select-previous)
+  :hook
+  ((prog-mode org-mode) . company-mode)
   :custom
   (company-idle-delay 0.1)
   (company-minimum-prefix-length 1))
@@ -398,7 +409,7 @@ The [[https://github.com/magit/magit][magit]] package provides a wrapper upon mo
 *** Git Gutter
 The [[https://github.com/emacsorphanage/git-gutter][git-gutter]] and [[https://github.com/emacsorphanage/git-gutter-fringe][git-gutter-fringe]] packages provide a nice visual indicator in
 the fringe to see which lines are modified, added or deleted and not commited
-yet.  
+yet.
 #+BEGIN_SRC emacs-lisp
 (use-package git-gutter
   :hook ((prog-mode org-mode) . git-gutter-mode))
@@ -432,6 +443,8 @@ Evil.
   :config
   (evil-collection-init))
 #+END_SRC
+The [[https://github.com/apchamberlain/undo-tree.el][undo-tree]] package provides a more traditional undo system without loosing
+information about past states of the buffer
 #+BEGIN_SRC emacs-lisp
 (use-package undo-tree
   :after (evil)
@@ -440,9 +453,10 @@ Evil.
 #+END_SRC
 ** General
 The [[https://github.com/noctuid/general.el][general]] package provides an easy way to bind keys and integrates well with
-evil. 
-#+BEGIN_SRC emacs-lisp 
-(use-package general)
+evil.
+#+BEGIN_SRC emacs-lisp
+(use-package general
+  :after (evil))
 #+END_SRC
 We define some keybindings for often used commands. They all start with the
 prefix space, à la [[https://github.com/syl20bnr/spacemacs][spacemacs]]. We need to use the keymap =override= otherwise
@@ -467,7 +481,7 @@ evil would bind the space key.
 #+END_SRC
 We add some keys for full sized keyboards.
 #+BEGIN_SRC emacs-lisp
-(general-define-key 
+(general-define-key
   "<next>"  '(lambda ()
               (interactive)
 	      (next-line 40))
