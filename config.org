@@ -23,6 +23,7 @@
   - [[#git][Git]]
 - [[#keybindings][Keybindings]]
   - [[#evil][Evil]]
+  - [[#avy][Avy]]
   - [[#general][General]]
 - [[#media][Media]]
   - [[#elfeed][Elfeed]]
@@ -436,8 +437,7 @@ yet.
 (use-package git-gutter
   :hook ((prog-mode org-mode) . git-gutter-mode))
 
-(use-package git-gutter-fringe
-  :after (git-gutter))
+(use-package git-gutter-fringe)
 #+END_SRC
 This snippet is taken [[https://github.com/hlissner/doom-emacs][doom-emacs]] and provides a nice bitmap fringe for git-gutter.
 #+BEGIN_SRC emacs-lisp
@@ -475,6 +475,12 @@ information about past states of the buffer
   :config
   (global-undo-tree-mode))
 #+END_SRC
+** Avy
+The [[https://github.com/abo-abo/avy][avy]] package provides a way to move in the buffer using a char-based decision
+tree.
+#+BEGIN_SRC emacs-lisp
+(use-package avy)
+#+END_SRC
 ** General
 The [[https://github.com/noctuid/general.el][general]] package provides an easy way to bind keys and integrates well with
 evil.
@@ -501,6 +507,10 @@ evil would bind the space key.
   "gc"  'magit-commit
   "gp"  'magit-push
   "gs"  'magit-status
+  "al"  'avy-goto-line
+  "ac"  'avy-goto-char-2
+  "aw"  'avy-goto-word-1
+  "at"  'avy-goto-char-timer
   "p"   'projectile-command-map)
 #+END_SRC
 We add some keys for full sized keyboards.
