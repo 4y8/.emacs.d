@@ -24,6 +24,7 @@
 - [[#media][Media]]
   - [[#elfeed][Elfeed]]
   - [[#notmuch][Notmuch]]
+  - [[#eww][Eww]]
 - [[#keybindings][Keybindings]]
   - [[#evil][Evil]]
   - [[#avy][Avy]]
@@ -31,7 +32,7 @@
 
 * Introduction
 ** Private configuration
-First of all, wa load the private config that you have to set yourself, in your
+First of all, we load the private config that you have to set yourself, in your
 own private.el. You have to set up the user mail address and elfeed feeds.
 #+BEGIN_SRC emacs-lisp
   (load "~/.emacs.d/private.el")
@@ -535,6 +536,11 @@ tell that =notmuch= needs =gnutls-cli= and =notmuch=.
     (message-kill-buffer-on-exit t)
     (message-directory "~/.mail"))
 #+END_SRC
+** Eww
+We set =eww= as the default web browser to use.
+#+BEGIN_SRC emacs-lisp
+  (setq browse-url-browser-function 'eww-browse-url)
+#+END_SRC 
 * Keybindings
 ** Evil
 The [[https://github.com/emacs-evil/evil][Evil]] package provides emulation for the main features of Vim.
@@ -560,9 +566,17 @@ The [[https://github.com/emacs-evil/evil-magit][evil-magit]] package provides ev
     :after (magit evil))
 #+END_SRC
 The [[https://github.com/apchamberlain/undo-tree.el][undo-tree]] package provides a more traditional undo system without loosing
-information about past states of the buffer
+information about past states of the buffer. Enable persistant buffer undo and
+compress the history.
 #+BEGIN_SRC emacs-lisp
   (use-package undo-tree
+    :config
+    (defadvice undo-tree-make-history-save-file-name
+        (after undo-tree activate)
+      (setq ad-return-value (concat ad-return-value ".gz")))
+    :custom
+    (undo-tree-auto-save-history t)
+    (undo-limit 10000)
     :after (evil)
     :config
     (global-undo-tree-mode))
