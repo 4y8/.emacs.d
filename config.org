@@ -44,10 +44,10 @@ We disable the garbage collector at launch time to improve performances.
 #+END_SRC
 After startup, we set it back to a 16MB threshold.
 #+BEGIN_SRC emacs-lisp
-(add-hook 'emacs-startup-hook
-  (lambda ()
-    (setq gc-cons-threshold 16777216
-          gc-cons-percentage 0.1)))
+  (add-hook 'emacs-startup-hook
+    (lambda ()
+      (setq gc-cons-threshold 16777216
+            gc-cons-percentage 0.1)))
 #+END_SRC
 ** Package management
 We add the [[https://melpa.org/#/][melpa]] package archive which contains most of emacs packages.
@@ -88,10 +88,10 @@ The [[https://github.com/rranelli/auto-package-update.el][auto-package-update]] 
 The [[https://gitlab.com/koral/gcmh][gcmh]] package provides more garbage collector related optimizations, but we
 need straight to install it so we can't install it with other optimizations.
 #+BEGIN_SRC emacs-lisp
-(use-package gcmh
-  :defer t
-  :init
-  (gcmh-mode 1))
+  (use-package gcmh
+    :defer t
+    :init
+    (gcmh-mode 1))
 #+END_SRC
 ** Security
 First, make emacs verify all TLS connections.
@@ -101,12 +101,12 @@ First, make emacs verify all TLS connections.
 #+END_SRC
 Then, we give emacs the location of certificates.
 #+BEGIN_SRC emacs-lisp
-(let ((trustfile "/etc/ssl/certs/ca-certificates.crt"))
-  (setq tls-program
-      `(,(format  "gnutls-cli --x509cafile %s -p %%p %%h" trustfile)
-        ,(format "openssl s_client -connect %%h:%%p -CAfile %s -no_ssl2 -ign_eof"
-                 trustfile)))
-  (setq gnutls-trustfiles (list trustfile)))
+  (let ((trustfile "/etc/ssl/certs/ca-certificates.crt"))
+    (setq tls-program
+        `(,(format  "gnutls-cli --x509cafile %s -p %%p %%h" trustfile)
+          ,(format "openssl s_client -connect %%h:%%p -CAfile %s -no_ssl2 -ign_eof"
+                   trustfile)))
+    (setq gnutls-trustfiles (list trustfile)))
 #+END_SRC
 ** Miscellaneous
 Switch to utf-8 encoding.
@@ -183,124 +183,124 @@ files, agenda items and projects.
 #+END_SRC
 To get dashboard when using =emacsclient -c=, we need the following line:
 #+BEGIN_SRC emacs-lisp
-(setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+  (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
 #+END_SRC
 ** Miscellaneous
 *** Font
 I like the [[https://github.com/NerdyPepper/scientifica][scientifica]] font, you can use another font format, however I've had
 problems with this font in other formats.
 #+BEGIN_SRC emacs-lisp
-(set-frame-font
- "-HBnP-scientifica-normal-normal-normal-*-11-*-*-*-*-0-iso10646-1")
+  (set-frame-font
+   "-HBnP-scientifica-normal-normal-normal-*-11-*-*-*-*-0-iso10646-1")
 #+END_SRC
 However, this won't work with =emacsclient -c= so we need this:
 #+BEGIN_SRC emacs-lisp
-(add-to-list 'default-frame-alist
-             '(font . "-HBnP-scientifica-normal-normal-normal-*-11-*-*-*-*-0-iso10646-1"))
+  (add-to-list 'default-frame-alist
+               '(font . "-HBnP-scientifica-normal-normal-normal-*-11-*-*-*-*-0-iso10646-1"))
 #+END_SRC
 *** Redundant UI elements
 We disable unuseful UI elements.
 #+BEGIN_SRC emacs-lisp
-(menu-bar-mode -1)
-(scroll-bar-mode -1)
-(tool-bar-mode -1)
+  (menu-bar-mode -1)
+  (scroll-bar-mode -1)
+  (tool-bar-mode -1)
 #+END_SRC
 *** Line numbers
 Enable line numbers in programming modes and org-mode.
 #+BEGIN_SRC emacs-lisp
-(add-hook 'prog-mode-hook 'display-line-numbers-mode)
-(add-hook 'org-mode-hook  'display-line-numbers-mode)
+  (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+  (add-hook 'org-mode-hook  'display-line-numbers-mode)
 #+END_SRC
 * Completion
 ** Ivy
 The [[https://github.com/abo-abo/swiper][ivy]] package provides a completion engine. We set a higher minibuffer than
 default.
 #+BEGIN_SRC emacs-lisp
-(use-package ivy
-  :config
-  (ivy-mode 1)
-  :custom
-  (ivy-height 20))
+  (use-package ivy
+    :config
+    (ivy-mode 1)
+    :custom
+    (ivy-height 20))
 #+END_SRC
 ** Swiper
 The [[https://github.com/abo-abo/swiper][swiper]] package provides an isearch alternative using ivy.
 #+BEGIN_SRC emacs-lisp
-(use-package swiper 
-  :commands (swiper))
+  (use-package swiper 
+    :commands (swiper))
 #+END_SRC
 ** Counsel
 The [[https://github.com/abo-abo/swiper][counsel]] package provides alternative commands for emacs builtin ones which
 uses ivy.
 #+BEGIN_SRC emacs-lisp
-(use-package counsel
-  :after (ivy)
-  :defer t
-  :config
-  (counsel-mode 1)
-  (setq ivy-initial-inputs-alist nil))
+  (use-package counsel
+    :after (ivy)
+    :defer t
+    :config
+    (counsel-mode 1)
+    (setq ivy-initial-inputs-alist nil))
 #+END_SRC
 ** Prescient
 We use the [[https://github.com/raxod502/prescient.el][prescient]] completion backend. We activate the persist option which
 allows history between different emacs sessions.
 #+BEGIN_SRC emacs-lisp
-(use-package prescient
-  :after (ivy company)
-  :config (prescient-persist-mode 1))
+  (use-package prescient
+    :after (ivy company)
+    :config (prescient-persist-mode 1))
 #+END_SRC
 We install the ivy backend of prescient.
 #+BEGIN_SRC emacs-lisp
-(use-package ivy-prescient
-  :after (ivy prescient)
-  :config (ivy-prescient-mode 1))
+  (use-package ivy-prescient
+    :after (ivy prescient)
+    :config (ivy-prescient-mode 1))
 #+END_SRC
 * Programming
 ** Common
 *** Projectile
 We use the [[https://github.com/bbatsov/projectile][projectile]] package to get good project completion and tooling.
 #+BEGIN_SRC emacs-lisp
-(use-package projectile
-  :commands (project-find-file)
-  :custom
-  (projectile-completion-system 'ivy))
+  (use-package projectile
+    :commands (project-find-file)
+    :custom
+    (projectile-completion-system 'ivy))
 #+END_SRC
 *** Parentheses
 We use electric pair mode to get the corresponding delimiters when we type
 one. For instance '(' will also add a ')'.
 #+BEGIN_SRC emacs-lisp
-(electric-pair-mode 1)
+  (electric-pair-mode 1)
 #+END_SRC
 We use the [[https://github.com/Fanael/rainbow-delimiters][rainbow-delimiters]] package to get matching parentheses and brackets
 of same colour.
 #+BEGIN_SRC emacs-lisp
-(use-package rainbow-delimiters
-  :defer t
-  :hook (prog-mode . rainbow-delimiters-mode))
+  (use-package rainbow-delimiters
+    :defer t
+    :hook (prog-mode . rainbow-delimiters-mode))
 #+END_SRC
 *** Tabulation
 Set up the tabulation width and the default style in c.
 #+BEGIN_SRC emacs-lisp
-(setq tab-width 8
-      electric-indent-inhibit t
-      c-default-style "bsd"
-      c-basic-offset tab-width)
+  (setq tab-width 8
+        electric-indent-inhibit t
+        c-default-style "bsd"
+        c-basic-offset tab-width)
 #+END_SRC
 Make backspace delete a full tab instead of a space at a time.
 #+BEGIN_SRC emacs-lisp
-(setq backward-delete-char-untabify-method 'hungry)
+  (setq backward-delete-char-untabify-method 'hungry)
 #+END_SRC
 Only use tabs in c mode, and use spaces in other programming languages.
 #+BEGIN_SRC emacs-lisp
-(add-hook 'emacs-lisp-mode-hook '(lambda () (setq indent-tabs-mode nil)))
-(add-hook 'tuareg-mode-hook     '(lambda () (setq indent-tabs-mode nil)))
-(add-hook 'org-mode-hook        '(lambda () (setq indent-tabs-mode nil)))
-(add-hook 'c-mode-hook          '(lambda () (setq indent-tabs-mode t)))
+  (add-hook 'emacs-lisp-mode-hook '(lambda () (setq indent-tabs-mode nil)))
+  (add-hook 'tuareg-mode-hook     '(lambda () (setq indent-tabs-mode nil)))
+  (add-hook 'org-mode-hook        '(lambda () (setq indent-tabs-mode nil)))
+  (add-hook 'c-mode-hook          '(lambda () (setq indent-tabs-mode t)))
 #+END_SRC
 The [[https://github.com/jcsalomon/smarttabs][smart tabs]] package allows us to use tabs for code blocks and spaces to align
 things like tables and arguments, so we enable it in c mode.
 #+BEGIN_SRC emacs-lisp
-(use-package smart-tabs-mode
-  :config
-  (smart-tabs-insinuate 'c))
+  (use-package smart-tabs-mode
+    :config
+    (smart-tabs-insinuate 'c))
 #+END_SRC
 *** Flycheck
 The [[https://github.com/flycheck/flycheck][flycheck]] package provides on the fly syntax cheking. We enable it in all
@@ -308,29 +308,29 @@ buffers. The hook makes flycheck stop complaining about package presentation
 when checking a emacs-lisp block from org-mode. We also change the way error are
 represented, replacing the wave by a straight underline.
 #+BEGIN_SRC emacs-lisp
-(use-package flycheck
-  :custom-face
-  (flycheck-info    ((t (:underline "#A3BE8C"))))
-  (flycheck-error   ((t (:underline "#BF616A"))))
-  (flycheck-warning ((t (:underline "#EBCB8B"))))
-  :init (global-flycheck-mode)
-  :hook
-  (org-src-mode . (lambda ()
-      (setq-local flycheck-disabled-checkers
-                  '(emacs-lisp-checkdoc)))))
+  (use-package flycheck
+    :custom-face
+    (flycheck-info    ((t (:underline "#A3BE8C"))))
+    (flycheck-error   ((t (:underline "#BF616A"))))
+    (flycheck-warning ((t (:underline "#EBCB8B"))))
+    :init (global-flycheck-mode)
+    :hook
+    (org-src-mode . (lambda ()
+        (setq-local flycheck-disabled-checkers
+                    '(emacs-lisp-checkdoc)))))
 #+END_SRC
 Replace flycheck's default fringe with a bitmap arrow.
 #+BEGIN_SRC emacs-lisp
-(define-fringe-bitmap 'flycheck-error-bmp 
-  (vector #b10000000
-          #b11000000
-          #b11100000
-          #b11110000
-          #b11100000
-          #b11000000
-          #b10000000)
-  nil nil 'center)
-(flycheck-redefine-standard-error-levels nil 'flycheck-error-bmp)
+  (define-fringe-bitmap 'flycheck-error-bmp 
+    (vector #b10000000
+            #b11000000
+            #b11100000
+            #b11110000
+            #b11100000
+            #b11000000
+            #b10000000)
+    nil nil 'center)
+  (flycheck-redefine-standard-error-levels nil 'flycheck-error-bmp)
 #+END_SRC
 *** Company
 The [[https://github.com/company-mode/company-mode][company]] package provides in buffer auto-completion. We tell it to start
@@ -338,25 +338,25 @@ completing from the first character and provide keybindings to move in
 suggestions without moving from the home row. We activate it in programming
 modes and in org-mode.
 #+BEGIN_SRC emacs-lisp
-(use-package company
-  :hook
-  ((prog-mode org-mode) . company-mode)
-  :bind
-  (:map company-active-map
-  ("<tab>" . 'company-complete-selection)
-  ("M-l"   . 'company-complete-common)
-  ("M-j"   . 'company-select-next)
-  ("M-k"   . 'company-select-previous))
-  :custom
-  (company-idle-delay 0.1)
-  (company-minimum-prefix-length 1))
+  (use-package company
+    :hook
+    ((prog-mode org-mode) . company-mode)
+    :bind
+    (:map company-active-map
+    ("<tab>" . 'company-complete-selection)
+    ("M-l"   . 'company-complete-common)
+    ("M-j"   . 'company-select-next)
+    ("M-k"   . 'company-select-previous))
+    :custom
+    (company-idle-delay 0.1)
+    (company-minimum-prefix-length 1))
 #+END_SRC
 We use the prescient integration with company to get better sorted
 auto-completion.
 #+BEGIN_SRC emacs-lisp
-(use-package company-prescient
-  :after (company prescient)
-  :config (company-prescient-mode))
+  (use-package company-prescient
+    :after (company prescient)
+    :config (company-prescient-mode))
 #+END_SRC
 ** Languages
 *** C
@@ -365,31 +365,31 @@ The [[https://github.com/Sarcasm/irony-mode][irony-mode]] package provides auto-
 based on libclang. So it needs to be installed using =irony-install-server=. Of
 course we only enable it in c mode.
 #+BEGIN_SRC emacs-lisp
-(use-package irony
-  :hook
-  (c-mode     . irony-mode)
-  (irony-mode . irony-cdb-autosetup-compile-options))
+  (use-package irony
+    :hook
+    (c-mode     . irony-mode)
+    (irony-mode . irony-cdb-autosetup-compile-options))
 #+END_SRC
 To get syntax checking with irony we use the [[https://github.com/Sarcasm/flycheck-irony][flycheck-irony]] backend of flycheck
 which we load after flycheck and irony and enable it when flycheck is enabled.
 #+BEGIN_SRC emacs-lisp
-(use-package flycheck-irony
-  :after (flycheck irony)
-  :hook (flycheck-mode . flycheck-irony-setup))
+  (use-package flycheck-irony
+    :after (flycheck irony)
+    :hook (flycheck-mode . flycheck-irony-setup))
 #+END_SRC
 To get auto-completion with irony we use the [[https://github.com/Sarcasm/company-irony][company-irony]] backend of company.
 #+BEGIN_SRC emacs-lisp
-(use-package company-irony
-  :after (irony company)
-  :config
-  (add-to-list 'company-backends 'company-irony))
+  (use-package company-irony
+    :after (irony company)
+    :config
+    (add-to-list 'company-backends 'company-irony))
 #+END_SRC
 We also use the [[https://github.com/hotpxl/company-irony-c-headers][company-irony-c-headers]] of company to get completion of headers
 file.
 #+BEGIN_SRC emacs-lisp
-(use-package company-irony-c-headers
-  :after (irony company)
-  :config (add-to-list 'company-backends 'company-irony-c-headers))
+  (use-package company-irony-c-headers
+    :after (irony company)
+    :config (add-to-list 'company-backends 'company-irony-c-headers))
 #+END_SRC
 We can get documentation from c files using the irony backend of eldoc.
 #+BEGIN_SRC emacs-lisp
@@ -401,100 +401,100 @@ We can get documentation from c files using the irony backend of eldoc.
 The [[https://github.com/Lindydancer/cmake-font-lock/tree/9e0fcd1ee2cf316f661f2d652368b12f83a4ec9c][cmake-font-lock]] package provides advanced syntax highlighting for CMake
 files.
 #+BEGIN_SRC emacs-lisp
-(use-package cmake-font-lock
-  :mode ("\\.cmake\\'||CMakeLists.txt"))
+  (use-package cmake-font-lock
+    :mode ("\\.cmake\\'||CMakeLists.txt"))
 #+END_SRC
 *** Ocaml
 The [[https://github.com/ocaml/tuareg][tuareg]] package provides a REPL, syntax highlighting and a debugger. We tell
 it to align patterns in pattern matching.
 #+BEGIN_SRC emacs-lisp
-(use-package tuareg
-  :custom
-  (tuareg-match-patterns-aligned t)
-  :mode "\\.ml\\'")
+  (use-package tuareg
+    :custom
+    (tuareg-match-patterns-aligned t)
+    :mode "\\.ml\\'")
 #+END_SRC
 The [[https://github.com/ocaml/merlin][merlin]] package provides auto-completion, syntax-checking and type
 annotations for ocaml. We use with tuareg and add it to the list of company
 backends, so we load it after these packages.
 #+BEGIN_SRC emacs-lisp
-(use-package merlin
-  :after (tuareg company)
-  :config
-  (add-to-list 'company-backends 'merlin-company-backend)
-  :hook
-  ((caml-mode tuareg-mode) . merlin-mode))
+  (use-package merlin
+    :after (tuareg company)
+    :config
+    (add-to-list 'company-backends 'merlin-company-backend)
+    :hook
+    ((caml-mode tuareg-mode) . merlin-mode))
 #+END_SRC
 We can get documentation from ocaml files using the merlin backend of eldoc.
 #+BEGIN_SRC emacs-lisp
-(use-package merlin-eldoc
-  :hook ((tuareg-mode caml-mode) . merlin-eldoc-setup)
-  :custom
-  (eldoc-echo-area-use-multiline-p t)
-  (merlin-eldoc-max-lines 6))
+  (use-package merlin-eldoc
+    :hook ((tuareg-mode caml-mode) . merlin-eldoc-setup)
+    :custom
+    (eldoc-echo-area-use-multiline-p t)
+    (merlin-eldoc-max-lines 6))
 #+END_SRC
 By default merlin uses flymake, however we use flycheck, so we disable its
 internal error reporting mechanism and replace it by a one which uses flycheck.
 #+BEGIN_SRC emacs-lisp
-(use-package flycheck-ocaml
-  :after (merlin flycheck)
-  :config
-  (setq merlin-error-after-save nil)
-  (flycheck-ocaml-setup))
+  (use-package flycheck-ocaml
+    :after (merlin flycheck)
+    :config
+    (setq merlin-error-after-save nil)
+    (flycheck-ocaml-setup))
 #+END_SRC
 *** Org
 Unable auto fill in org mode to make paragraphs of 80 lines automaticlly. We
 only load the =emacs-lisp= backend of literate programming with org-mode.
 #+BEGIN_SRC emacs-lisp
-(use-package org
-  :defer t
-  :custom 
-  (fill-column 80)
-  :hook 
-  (org-mode . auto-fill-mode)
-  :config
-  (org-babel-do-load-languages
-    'org-babel-load-languages
-    '((emacs-lisp . t))))
+  (use-package org
+    :defer t
+    :custom 
+    (fill-column 80)
+    :hook 
+    (org-mode . auto-fill-mode)
+    :config
+    (org-babel-do-load-languages
+      'org-babel-load-languages
+      '((emacs-lisp . t))))
 #+END_SRC
 The [[https://github.com/snosov1/toc-org][toc-org]] auto generates table of contents on the first outline with a =:TOC:=
 tag, so we turn it in org files and load it after org-mode.
 #+BEGIN_SRC emacs-lisp
-(use-package toc-org 
-  :after (org)
-  :hook (org-mode . toc-org-enable))
+  (use-package toc-org 
+    :after (org)
+    :hook (org-mode . toc-org-enable))
 #+END_SRC
 ** Git
 *** Magit
 The [[https://github.com/magit/magit][magit]] package provides a wrapper upon most of often used git commands.
 #+BEGIN_SRC emacs-lisp
-(use-package magit
-  :commands (magit-commit magit-push magit-status))
+  (use-package magit
+    :commands (magit-commit magit-push magit-status))
 #+END_SRC
 *** Git gutter 
 The [[https://github.com/emacsorphanage/git-gutter][git-gutter]] and [[https://github.com/emacsorphanage/git-gutter-fringe][git-gutter-fringe]] packages provide a nice visual indicator in
 the fringe to see which lines are modified, added or deleted and not commited
 yet.
 #+BEGIN_SRC emacs-lisp
-(use-package git-gutter
-  :hook ((prog-mode org-mode) . git-gutter-mode))
+  (use-package git-gutter
+    :hook ((prog-mode org-mode) . git-gutter-mode))
 
-(use-package git-gutter-fringe)
+  (use-package git-gutter-fringe)
 #+END_SRC
 Provides a nice bitmap fringe for git-gutter.
 #+BEGIN_SRC emacs-lisp
-(setq-default fringes-outside-margins t)
-(define-fringe-bitmap 'git-gutter-fr:added
-  (vector #b11100000)
-  nil nil '(center repeated))
-(define-fringe-bitmap 'git-gutter-fr:modified
-  (vector #b11100000)
-  nil nil '(center repeated))
-(define-fringe-bitmap 'git-gutter-fr:deleted
-  (vector #b10000000
-          #b11000000
-          #b11100000
-	  #b11110000)
-  nil nil 'bottom)
+  (setq-default fringes-outside-margins t)
+  (define-fringe-bitmap 'git-gutter-fr:added
+    (vector #b11100000)
+    nil nil '(center repeated))
+  (define-fringe-bitmap 'git-gutter-fr:modified
+    (vector #b11100000)
+    nil nil '(center repeated))
+  (define-fringe-bitmap 'git-gutter-fr:deleted
+    (vector #b10000000
+            #b11000000
+            #b11100000
+            #b11110000)
+    nil nil 'bottom)
 #+END_SRC
 * Media
 ** Elfeed
@@ -531,11 +531,11 @@ tell that =notmuch= needs =gnutls-cli= and =notmuch=.
 ** Evil
 The [[https://github.com/emacs-evil/evil][Evil]] package provides emulation for the main features of Vim.
 #+BEGIN_SRC emacs-lisp
-(use-package evil
-  :init
-  (setq evil-want-keybinding nil)
-  :config
-  (evil-mode 1))
+  (use-package evil
+    :init
+    (setq evil-want-keybinding nil)
+    :config
+    (evil-mode 1))
 #+END_SRC
 The [[https://github.com/emacs-evil/evil-collection][Evil Collection]] package provides Vim emulation for packages not covered by
 Evil. We already modified company keybindings so we disable evil' one. 
@@ -548,29 +548,29 @@ Evil. We already modified company keybindings so we disable evil' one.
 #+END_SRC
 The [[https://github.com/emacs-evil/evil-magit][evil-magit]] package provides evil keybindings for magit.
 #+BEGIN_SRC emacs-lisp
-(use-package evil-magit
-  :after (magit evil))
+  (use-package evil-magit
+    :after (magit evil))
 #+END_SRC
 The [[https://github.com/apchamberlain/undo-tree.el][undo-tree]] package provides a more traditional undo system without loosing
 information about past states of the buffer
 #+BEGIN_SRC emacs-lisp
-(use-package undo-tree
-  :after (evil)
-  :config
-  (global-undo-tree-mode))
+  (use-package undo-tree
+    :after (evil)
+    :config
+    (global-undo-tree-mode))
 #+END_SRC
 ** Avy
 The [[https://github.com/abo-abo/avy][avy]] package provides a way to move in the buffer using a char-based decision
 tree.
 #+BEGIN_SRC emacs-lisp
-(use-package avy)
+  (use-package avy)
 #+END_SRC
 ** General
 The [[https://github.com/noctuid/general.el][general]] package provides an easy way to bind keys and integrates well with
 evil.
 #+BEGIN_SRC emacs-lisp
-(use-package general
-  :after (evil))
+  (use-package general
+    :after (evil))
 #+END_SRC
 We define some keybindings for often used commands. They all start with the
 prefix space, à la [[https://github.com/syl20bnr/spacemacs][spacemacs]]. We need to use the keymap =override= otherwise
@@ -585,7 +585,7 @@ evil would bind the space key.
     "ff"  'find-file
     "bb"  'counsel-switch-buffer
     "fr"  'counsel-recentf
-    "ec"  'counsel-flycheck
+    "hj"  'counsel-flycheck
     "cr"  'comment-region
     "cc"  'comment-line
     "gc"  'magit-commit
@@ -598,6 +598,20 @@ evil would bind the space key.
     "ml"  'notmuch
     "mk"  'compose-mail 
     "p"   'projectile-command-map)
+#+END_SRC
+We add some key bindings to edit source blocks in =org-mode=.
+#+BEGIN_SRC emacs-lisp
+  (general-define-key
+   :prefix "SPC"
+   :states 'normal
+   :keymaps '(org-mode-map)
+   "cf" 'org-edit-special)
+
+  (general-define-key
+   :prefix "SPC"
+   :states 'normal
+   :keymaps '(org-src-mode-map)
+   "cf" 'org-edit-src-exit)
 #+END_SRC
 We add some keys for full sized keyboards.
 #+BEGIN_SRC emacs-lisp
