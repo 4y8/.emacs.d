@@ -86,10 +86,10 @@ The [[https://github.com/rranelli/auto-package-update.el][auto-package-update]] 
 #+END_SRC
 ** Performance 2/2
 The [[https://gitlab.com/koral/gcmh][gcmh]] package provides more garbage collector related optimizations, but we
-need straight to install it so we can't install it with other optimizations.
+need our package manager to install it so we can't install it with the other
+optimizations.
 #+BEGIN_SRC emacs-lisp
   (use-package gcmh
-    :defer t
     :init
     (gcmh-mode 1))
 #+END_SRC
@@ -197,6 +197,12 @@ However, this won't work with =emacsclient -c= so we need this:
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'default-frame-alist
                '(font . "-HBnP-scientifica-normal-normal-normal-*-11-*-*-*-*-0-iso10646-1"))
+#+END_SRC
+By default =variable-pitch= uses a different font.
+#+BEGIN_SRC emacs-lisp
+  (custom-set-faces
+   '(variable-pitch ((t nil)))
+   '(fixed-pitch    ((t nil))))
 #+END_SRC
 *** Redundant UI elements
 We disable unuseful UI elements.
@@ -411,7 +417,7 @@ it to align patterns in pattern matching.
   (use-package tuareg
     :custom
     (tuareg-match-patterns-aligned t)
-    :mode "\\.ml\\'")
+    :mode ("\\.ml\\'" . tuareg-mode))
 #+END_SRC
 The [[https://github.com/ocaml/merlin][merlin]] package provides auto-completion, syntax-checking and type
 annotations for ocaml. We use with tuareg and add it to the list of company
@@ -468,7 +474,7 @@ tag, so we turn it in org files and load it after org-mode.
 The [[https://github.com/magit/magit][magit]] package provides a wrapper upon most of often used git commands.
 #+BEGIN_SRC emacs-lisp
   (use-package magit
-    :commands (magit-commit magit-push magit-status))
+    :commands (magit-commit magit-push magit-status magit-pull))
 #+END_SRC
 *** Git gutter 
 The [[https://github.com/emacsorphanage/git-gutter][git-gutter]] and [[https://github.com/emacsorphanage/git-gutter-fringe][git-gutter-fringe]] packages provide a nice visual indicator in
@@ -500,10 +506,12 @@ Provides a nice bitmap fringe for git-gutter.
 ** Elfeed
 [[https://github.com/skeeto/elfeed][Elfeed]] is a feed reader supporting Atom and RSS feeds. Feeds are set in the
 =private.el= file in a list named =elfeed-feeds=. We only load the package when
-the =elfeed= command is called. We also tell that elfeed needs =curl=.
+the =elfeed= command is called, and update feeds every time we open it. We also
+tell that elfeed needs =curl=.
 #+BEGIN_SRC emacs-lisp
   (use-package elfeed
     :ensure-system-package (curl)
+    :init (elfeed-update)
     :commands (elfeed))
 #+END_SRC
 ** Notmuch
@@ -597,6 +605,7 @@ evil would bind the space key.
     "at"  'avy-goto-char-timer
     "ml"  'notmuch
     "mk"  'compose-mail 
+    "mf"  'elfeed
     "p"   'projectile-command-map)
 #+END_SRC
 We add some key bindings to edit source blocks in =org-mode=.
