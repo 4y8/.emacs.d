@@ -21,20 +21,20 @@
   - [[#common][Common]]
   - [[#languages][Languages]]
   - [[#git][Git]]
+- [[#media][Media]]
+  - [[#elfeed][Elfeed]]
+  - [[#notmuch][Notmuch]]
 - [[#keybindings][Keybindings]]
   - [[#evil][Evil]]
   - [[#avy][Avy]]
   - [[#general][General]]
-- [[#media][Media]]
-  - [[#elfeed][Elfeed]]
-  - [[#mu4e][Mu4e]]
 
 * Introduction
 ** Private configuration
 First of all, wa load the private config that you have to set yourself, in your
 own private.el. You have to set up the user mail address and elfeed feeds.
 #+BEGIN_SRC emacs-lisp
-(load "~/.emacs.d/private.el")
+  (load "~/.emacs.d/private.el")
 #+END_SRC
 ** Performance 1/2
 We disable the garbage collector at launch time to improve performances.
@@ -52,31 +52,37 @@ After startup, we set it back to a 16MB threshold.
 ** Package management
 We add the [[https://melpa.org/#/][melpa]] package archive which contains most of emacs packages.
 #+BEGIN_SRC emacs-lisp
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-(package-initialize)
+  (require 'package)
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+  (package-initialize)
 #+END_SRC
 The [[https://github.com/jwiegley/use-package][use-package]] package provides an easier way to configure and install package,
 we load it since it's already installed as a git submodule.
 #+BEGIN_SRC emacs-lisp
-(eval-when-compile
-  (add-to-list 'load-path "~/.emacs.d/use-package")
-  (require 'use-package))
+  (eval-when-compile
+    (add-to-list 'load-path "~/.emacs.d/use-package")
+    (require 'use-package))
 #+END_SRC
-Then we tell use-package to check if a package is installed and install it if
+Then we tell =use-package= to check if a package is installed and install it if
 it's not unless we told it not to.
 #+BEGIN_SRC emacs-lisp
-(require 'use-package-ensure)
-(setq use-package-always-ensure t)
+  (require 'use-package-ensure)
+  (setq use-package-always-ensure t)
 #+END_SRC
-The [[https://github.com/rranelli/auto-package-update.el][auto-package-update]] package provides automatic updates with use-package.
+The [[https://github.com/waymondo/use-package-ensure-system-package][use-package-ensure-system-package]] provides a =use-package= extension to
+check and install system dependencies.
 #+BEGIN_SRC emacs-lisp
-(use-package auto-package-update
-  :defer 5
-  :config
-  (setq auto-package-update-delete-old-versions t)
-  (setq auto-package-update-hide-results t)
-  (auto-package-update-maybe))
+  (use-package use-package-ensure-system-package)
+#+END_SRC
+The [[https://github.com/rranelli/auto-package-update.el][auto-package-update]] package provides automatic updates with
+=use-package=. We tell it to only update packages after 5 seconds in idle.
+#+BEGIN_SRC emacs-lisp
+  (use-package auto-package-update
+    :defer 5
+    :config
+    (setq auto-package-update-delete-old-versions t)
+    (setq auto-package-update-hide-results t)
+    (auto-package-update-maybe))
 #+END_SRC
 ** Performance 2/2
 The [[https://gitlab.com/koral/gcmh][gcmh]] package provides more garbage collector related optimizations, but we
@@ -90,8 +96,8 @@ need straight to install it so we can't install it with other optimizations.
 ** Security
 First, make emacs verify all TLS connections.
 #+BEGIN_SRC emacs-lisp
-(setq tls-checktrust t
-      gnutls-verify-error t)
+  (setq tls-checktrust t
+        gnutls-verify-error t)
 #+END_SRC
 Then, we give emacs the location of certificates.
 #+BEGIN_SRC emacs-lisp
@@ -105,75 +111,75 @@ Then, we give emacs the location of certificates.
 ** Miscellaneous
 Switch to utf-8 encoding.
 #+BEGIN_SRC emacs-lisp
-(set-default-coding-systems 'utf-8)
+  (set-default-coding-systems 'utf-8)
 #+END_SRC
 Use y/n prompts instead of yes/no ones.
 #+BEGIN_SRC emacs-lisp
-(fset 'yes-or-no-p 'y-or-n-p)
+  (fset 'yes-or-no-p 'y-or-n-p)
 #+END_SRC
 * Aesthetic changes
 ** Theme
 Install doom themes, enable italic and bold fonts and enable the nord theme. And
 enable org-mode's fontification.
 #+BEGIN_SRC emacs-lisp
-(use-package doom-themes
-  :config
-  (setq doom-themes-enable-bold t
-        doom-themes-enable-italic t)
-  (load-theme 'doom-nord t)
-  (doom-themes-visual-bell-config)
-  (doom-themes-org-config))
+  (use-package doom-themes
+    :config
+    (setq doom-themes-enable-bold t
+          doom-themes-enable-italic t)
+    (load-theme 'doom-nord t)
+    (doom-themes-visual-bell-config)
+    (doom-themes-org-config))
 #+END_SRC
 ** Bar
 The [[https://gitlab.com/jessieh/mood-line][mood-line]] package provides a [[https://github.com/hlissner/emacs-doom-themes][doom-modeline]] inspired bar, based on the
 original emacs bar. We also add time in the bar.
 #+BEGIN_SRC emacs-lisp
-(use-package mood-line
-  :config
-  (mood-line-mode)
-  (display-time-mode))
+  (use-package mood-line
+    :config
+    (mood-line-mode)
+    (display-time-mode))
 #+END_SRC
 *** Patch
 The '⚑' character, used for issues by the bar, doesn't work well with the font I
 use. So we use the [[https://github.com/raxod502/el-patch][el-patch]] package which allows to patch the bar.
 #+BEGIN_SRC emacs-lisp
-(use-package el-patch)
+  (use-package el-patch)
 
-(el-patch-feature mood-line)
-(with-eval-after-load 'mood-line
-  (el-patch-defun mood-line--update-flycheck-segment (&optional status)
-    "Update `mood-line--flycheck-text' against the reported flycheck STATUS."
-    (setq mood-line--flycheck-text
-        (pcase status
-          ('finished (if flycheck-current-errors
-                         (let-alist (flycheck-count-errors flycheck-current-errors)
-                           (let ((sum (+ (or .error 0) (or .warning 0))))
-                             (propertize (concat
-                                          (el-patch-swap "⚑ Issues: " "Issues: ")
-                                          (number-to-string sum)
-                                          "  ")
-                                         'face (if .error
-                                                   'mood-line-status-error
-                                                 'mood-line-status-warning))))
-                       (propertize "✔ Good  " 'face 'mood-line-status-success)))
-          ('running (propertize "Δ Checking  " 'face 'mood-line-status-info))
-          ('errored (propertize "✖ Error  " 'face 'mood-line-status-error))
-          ('interrupted (propertize "⏸ Paused  " 'face 'mood-line-status-neutral))
-          ('no-checker "")))))
+  (el-patch-feature mood-line)
+  (with-eval-after-load 'mood-line
+    (el-patch-defun mood-line--update-flycheck-segment (&optional status)
+      "Update `mood-line--flycheck-text' against the reported flycheck STATUS."
+      (setq mood-line--flycheck-text
+          (pcase status
+            ('finished (if flycheck-current-errors
+                           (let-alist (flycheck-count-errors flycheck-current-errors)
+                             (let ((sum (+ (or .error 0) (or .warning 0))))
+                               (propertize (concat
+                                            (el-patch-swap "⚑ Issues: " "Issues: ")
+                                            (number-to-string sum)
+                                            "  ")
+                                           'face (if .error
+                                                     'mood-line-status-error
+                                                   'mood-line-status-warning))))
+                         (propertize "✔ Good  " 'face 'mood-line-status-success)))
+            ('running (propertize "Δ Checking  " 'face 'mood-line-status-info))
+            ('errored (propertize "✖ Error  " 'face 'mood-line-status-error))
+            ('interrupted (propertize "⏸ Paused  " 'face 'mood-line-status-neutral))
+            ('no-checker "")))))
 #+END_SRC
 ** Dashboard
 We use the [[https://github.com/emacs-dashboard/emacs-dashboard][emacs-dashboard]] package which displays a nice home page with recent
 files, agenda items and projects.
 #+BEGIN_SRC emacs-lisp
-(use-package dashboard
-  :custom
-  (dashboard-show-shortcuts nil)
-  (dashboard-items '((recents . 20)
-                     (agenda . 5)
-                     (projects . 8)))
-  :config
-  (global-page-break-lines-mode)
-  (dashboard-setup-startup-hook))
+  (use-package dashboard
+    :custom
+    (dashboard-show-shortcuts nil)
+    (dashboard-items '((recents . 20)
+                       (agenda . 5)
+                       (projects . 8)))
+    :config
+    (global-page-break-lines-mode)
+    (dashboard-setup-startup-hook))
 #+END_SRC
 To get dashboard when using =emacsclient -c=, we need the following line:
 #+BEGIN_SRC emacs-lisp
@@ -244,7 +250,7 @@ allows history between different emacs sessions.
 We install the ivy backend of prescient.
 #+BEGIN_SRC emacs-lisp
 (use-package ivy-prescient
-  :after (ivy counsel prescient)
+  :after (ivy prescient)
   :config (ivy-prescient-mode 1))
 #+END_SRC
 * Programming
@@ -490,6 +496,37 @@ Provides a nice bitmap fringe for git-gutter.
 	  #b11110000)
   nil nil 'bottom)
 #+END_SRC
+* Media
+** Elfeed
+[[https://github.com/skeeto/elfeed][Elfeed]] is a feed reader supporting Atom and RSS feeds. Feeds are set in the
+=private.el= file in a list named =elfeed-feeds=. We only load the package when
+the =elfeed= command is called. We also tell that elfeed needs =curl=.
+#+BEGIN_SRC emacs-lisp
+  (use-package elfeed
+    :ensure-system-package (curl)
+    :commands (elfeed))
+#+END_SRC
+** Notmuch
+[[https://notmuchmail.org/][Notmuch]] is an email-client. We only load the package when the =notmuch= command
+is called. You need to install the =notmuch= and =notmuch-emacs= packages with
+your package manager. We tell =use-package= not to install =notmuch= since it's
+already installed by the package manager. We also tell emacs which commands to
+use to send email - the smtp server has to be configured in =private.el=. We
+tell that =notmuch= needs =gnutls-cli= and =notmuch=.
+#+BEGIN_SRC emacs-lisp
+  (use-package notmuch 
+    :ensure nil
+    :commands (notmuch)
+    :ensure-system-package 
+    ((gnutls-cli . gnutls-bin)
+      notmuch)
+    :custom 
+    (message-send-mail-function 'smtpmail-send-it)
+    (mail-send-mail-function 'smtpmail-send-it)
+    (message-auto-save-directory "~/.mail/draft")
+    (message-kill-buffer-on-exit t)
+    (message-directory "~/.mail"))
+#+END_SRC
 * Keybindings
 ** Evil
 The [[https://github.com/emacs-evil/evil][Evil]] package provides emulation for the main features of Vim.
@@ -508,6 +545,11 @@ Evil. We already modified company keybindings so we disable evil' one.
   :custom (evil-collection-company-use-tng nil)
   :config
   (evil-collection-init))
+#+END_SRC
+The [[https://github.com/emacs-evil/evil-magit][evil-magit]] package provides evil keybindings for magit.
+#+BEGIN_SRC emacs-lisp
+(use-package evil-magit
+  :after (magit evil))
 #+END_SRC
 The [[https://github.com/apchamberlain/undo-tree.el][undo-tree]] package provides a more traditional undo system without loosing
 information about past states of the buffer
@@ -534,62 +576,36 @@ We define some keybindings for often used commands. They all start with the
 prefix space, à la [[https://github.com/syl20bnr/spacemacs][spacemacs]]. We need to use the keymap =override= otherwise
 evil would bind the space key.
 #+BEGIN_SRC emacs-lisp
-(general-define-key
-  :prefix "SPC"
-  :states 'normal
-  :keymaps 'override
-  "SPC" 'projectile-find-file
-  "sb"  'swiper
-  "ff"  'find-file
-  "bb"  'counsel-switch-buffer
-  "fr"  'counsel-recentf
-  "ec"  'counsel-flycheck
-  "cr"  'comment-region
-  "cc"  'comment-line
-  "gc"  'magit-commit
-  "gp"  'magit-push
-  "gs"  'magit-status
-  "al"  'avy-goto-line
-  "ac"  'avy-goto-char-2
-  "aw"  'avy-goto-word-1
-  "at"  'avy-goto-char-timer
-  "p"   'projectile-command-map)
+  (general-define-key
+    :prefix "SPC"
+    :states 'normal
+    :keymaps 'override
+    "SPC" 'projectile-find-file
+    "sb"  'swiper
+    "ff"  'find-file
+    "bb"  'counsel-switch-buffer
+    "fr"  'counsel-recentf
+    "ec"  'counsel-flycheck
+    "cr"  'comment-region
+    "cc"  'comment-line
+    "gc"  'magit-commit
+    "gp"  'magit-push
+    "gs"  'magit-status
+    "al"  'avy-goto-line
+    "ac"  'avy-goto-char-2
+    "aw"  'avy-goto-word-1
+    "at"  'avy-goto-char-timer
+    "ml"  'notmuch
+    "mk"  'compose-mail 
+    "p"   'projectile-command-map)
 #+END_SRC
 We add some keys for full sized keyboards.
 #+BEGIN_SRC emacs-lisp
-(general-define-key
-  "<next>"  '(lambda ()
-              (interactive)
-	      (next-line 40))
-  "<prior>" '(lambda ()
-              (interactive)
-	      (previous-line 40)))
-#+END_SRC
-* Media
-** Elfeed
-[[https://github.com/skeeto/elfeed][Elfeed]] is a feed reader supporting Atom and RSS feeds. Feeds are set in the
-=private.el= file in a list named =elfeed-feeds=. We only load the package when
-the =elfeed= command is called.
-#+BEGIN_SRC emacs-lisp
-(use-package elfeed
-  :commands (elfeed))
-#+END_SRC
-** Mu4e
-[[https://github.com/djcb/mu][Mu4e]] is an email-client, you have to set the paths yourself since they are not
-the same for all email servers. The =html2text= program has to be installed
-since it provides better and faster html to text features, but you can remove
-the line if you don't want it. We only load the package when the =mu4e= command
-is called.
-#+BEGIN_SRC emacs-lisp
-(use-package mu4e
-  :ensure nil
-  :commands (mu4e)
-  :custom
-  (mu4e-maildir           "~/.mail")
-  (mu4e-sent-folder       "/INBOX.OUTBOX")
-  (mu4e-drafts-folder     "/INBOX.DRAFT")
-  (mu4e-trash-folder      "/INBOX.TRASH")
-  (mu4e-refile-folder     "/INBOX")
-  (smtpmail-smtp-user     user-mail-address)
-  (mu4e-html2text-command "html2text"))
+  (general-define-key
+    "<next>"  '(lambda ()
+                (interactive)
+                (next-line 40))
+    "<prior>" '(lambda ()
+                (interactive)
+                (previous-line 40)))
 #+END_SRC
