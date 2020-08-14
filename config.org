@@ -404,6 +404,31 @@ We can get documentation from c files using the irony backend of eldoc.
     :after (irony)
     :hook (irony-mode . irony-eldoc))
 #+END_SRC
+We define a function to use [[https://github.com/uncrustify/uncrustify][uncrustify]] on the local buffer.
+#+BEGIN_SRC emacs-lisp
+  (defun uncrustify ()
+    "Use uncrustify on the current buffer."
+    (interactive)
+    (let ((save-point (point)))
+      (shell-command-on-region
+       (point-min)
+       (point-max)
+       "uncrustify -c ~/.uncrustify.cfg"
+       (current-buffer)
+       t
+       "*uncrustify error buffer"
+       nil)
+      (goto-char save-point)))
+#+END_SRC
+We add summon this function when saving a c file.
+#+BEGIN_SRC emacs-lisp
+  (defun uncrustify-on-save ()
+    "Unable uncrustify on save on the local buffer"
+    (interactive)
+    (add-hook 'before-save-hook 'uncrustify nil t))
+
+  (add-hook 'c-mode-hook 'uncrustify-on-save)
+#+END_SRC
 **** CMake
 The [[https://github.com/Lindydancer/cmake-font-lock/tree/9e0fcd1ee2cf316f661f2d652368b12f83a4ec9c][cmake-font-lock]] package provides advanced syntax highlighting for CMake
 files.
