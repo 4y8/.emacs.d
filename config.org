@@ -1,4 +1,4 @@
-#+TITLE:My configuration
+#+TITLE:My confiuration
 * Table of Content                                                      :TOC:
 - [[#introduction][Introduction]]
   - [[#private-configuration][Private configuration]]
@@ -8,7 +8,7 @@
   - [[#security][Security]]
   - [[#miscellaneous][Miscellaneous]]
 - [[#aesthetic-changes][Aesthetic changes]]
-  - [[#themes][Themes]]
+  - [[#theme][Theme]]
   - [[#bar][Bar]]
   - [[#dashboard][Dashboard]]
   - [[#miscellaneous-1][Miscellaneous]]
@@ -50,28 +50,33 @@ After startup, we set it back to a 16MB threshold.
           gc-cons-percentage 0.1)))
 #+END_SRC
 ** Package management
-We install the [[https://github.com/raxod502/straight.el][straight]] package manager, on the =develop= branch.
+We add the [[https://melpa.org/#/][melpa]] package archive which contains most of emacs packages.
 #+BEGIN_SRC emacs-lisp
-(defvar bootstrap-version)
-(setq straight-repository-branch "develop")
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 5))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
 #+END_SRC
-Then we install [[https://github.com/jwiegley/use-package][use-package]], to provide easier package configuration and
-installation. We also tell =use-package= to install packages from =straight= by
-default.
+The [[https://github.com/jwiegley/use-package][use-package]] package provides an easier way to configure and install package,
+we load it since it's already installed as a git submodule.
 #+BEGIN_SRC emacs-lisp
-(straight-use-package 'use-package)
-(setq straight-use-package-by-default t)
+(eval-when-compile
+  (add-to-list 'load-path "~/.emacs.d/use-package")
+  (require 'use-package))
+#+END_SRC
+Then we tell use-package to check if a package is installed and install it if
+it's not unless we told it not to.
+#+BEGIN_SRC emacs-lisp
+(require 'use-package-ensure)
+(setq use-package-always-ensure t)
+#+END_SRC
+The [[https://github.com/rranelli/auto-package-update.el][auto-package-update]] package provides automatic updates with use-package.
+#+BEGIN_SRC emacs-lisp
+(use-package auto-package-update
+  :defer 5
+  :config
+  (setq auto-package-update-delete-old-versions t)
+  (setq auto-package-update-hide-results t)
+  (auto-package-update-maybe))
 #+END_SRC
 ** Performance 2/2
 The [[https://gitlab.com/koral/gcmh][gcmh]] package provides more garbage collector related optimizations, but we
@@ -81,11 +86,6 @@ need straight to install it so we can't install it with other optimizations.
   :defer t
   :init
   (gcmh-mode 1))
-#+END_SRC
-The [[https://github.com/jschaf/esup][esup]] package provides an easy way to benchmark startup time.
-#+BEGIN_SRC emacs-lisp
-(use-package esup
-  :commands (esup))
 #+END_SRC
 ** Security
 First, make emacs verify all TLS connections.
@@ -112,7 +112,7 @@ Use y/n prompts instead of yes/no ones.
 (fset 'yes-or-no-p 'y-or-n-p)
 #+END_SRC
 * Aesthetic changes
-** Themes
+** Theme
 Install doom themes, enable italic and bold fonts and enable the nord theme. And
 enable org-mode's fontification.
 #+BEGIN_SRC emacs-lisp
@@ -582,6 +582,7 @@ the line if you don't want it. We only load the package when the =mu4e= command
 is called.
 #+BEGIN_SRC emacs-lisp
 (use-package mu4e
+  :ensure nil
   :commands (mu4e)
   :custom
   (mu4e-maildir           "~/.mail")

@@ -10,11 +10,13 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   '("c33e247a2074ec855c47d3af487f821687f56cc03a3243209c64ed619c4a9bf3" default)))
+ '(package-selected-packages
+   '(auto-package-update tuareg toc-org smart-tabs-mode rainbow-delimiters projectile nord-theme mood-line merlin-eldoc magit ivy-prescient irony-eldoc git-gutter-fringe general gcmh flycheck-ocaml flycheck-irony evil-collection esup elfeed el-patch doom-themes dashboard counsel company-prescient company-irony-c-headers company-irony cmake-font-lock avy)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(flycheck-error ((t (:underline "#BF616A"))))
+ '(flycheck-info ((t (:underline "#A3BE8C"))))
+ '(flycheck-warning ((t (:underline "#EBCB8B")))))
