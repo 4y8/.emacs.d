@@ -541,6 +541,16 @@ tell that elfeed needs =curl=.
     :commands (elfeed))
 #+END_SRC
 ** Notmuch
+First of all, we create a function to update the mail box, by downloading and
+indexing new emails.
+#+BEGIN_SRC emacs-lisp
+  (defun update-mail ()
+    "Update offlineimap and notmuch."
+    (interactive)
+    (start-process-shell-command "offlineimap"
+                                 "offlineimap"
+                                 "offlineimap -o && notmuch new"))
+#+END_SRC
 [[https://notmuchmail.org/][Notmuch]] is an email-client. We only load the package when the =notmuch= command
 is called. You need to install the =notmuch= and =notmuch-emacs= packages with
 your package manager. We tell =use-package= not to install =notmuch= since it's
@@ -549,8 +559,9 @@ use to send email - the smtp server has to be configured in =private.el=. We
 tell that =notmuch= needs =gnutls-cli= and =notmuch=.
 #+BEGIN_SRC emacs-lisp
   (use-package notmuch 
+    :init (update-mail)
     :ensure nil
-    :commands (notmuch)
+    :commands (notmuch notmuch-mua-new-mail)
     :ensure-system-package 
     ((gnutls-cli . gnutls-bin)
       notmuch)
@@ -643,7 +654,7 @@ evil would bind the space key.
     "aw"  'avy-goto-word-1
     "at"  'avy-goto-char-timer
     "ml"  'notmuch
-    "mk"  'compose-mail 
+    "mk"  'notmuch-mua-new-mail
     "mf"  'elfeed
     "p"   'projectile-command-map)
 #+END_SRC
@@ -661,7 +672,15 @@ We add some key bindings to edit source blocks in =org-mode=.
    :keymaps '(org-src-mode-map)
    "cf" 'org-edit-src-exit)
 #+END_SRC
-We add some keys for full sized keyboards.
+Then we add keybindings for =message-mode=.
+#+BEGIN_SRC emacs-lisp
+  (general-define-key
+   :prefix "SPC"
+   :states 'normal
+   :keymaps '(message-mode-map notmuch-message-mode-map)
+   "ms" 'message-send-and-exit)
+#+END_SRC
+Finally, we add some keys for full sized keyboards.
 #+BEGIN_SRC emacs-lisp
   (general-define-key
     "<next>"  '(lambda ()
