@@ -252,7 +252,7 @@ We use the [[https://github.com/raxod502/prescient.el][prescient]] completion ba
 allows history between different emacs sessions.
 #+BEGIN_SRC emacs-lisp
   (use-package prescient
-    :after (ivy company)
+    :after (ivy)
     :config (prescient-persist-mode 1))
 #+END_SRC
 We install the ivy backend of prescient.
@@ -543,14 +543,19 @@ tell that elfeed needs =curl=.
 #+END_SRC
 ** Notmuch
 First of all, we create a function to update the mail box, by downloading and
-indexing new emails.
+indexing new emails. We also tag each email sent by the user with a special tag.
 #+BEGIN_SRC emacs-lisp
-  (defun update-mail ()
-    "Update offlineimap and notmuch."
-    (interactive)
-    (start-process-shell-command "offlineimap"
-                                 "offlineimap"
-                                 "offlineimap -o && notmuch new"))
+   (defun update-mail ()
+     "Update offlineimap and notmuch."
+     (interactive)
+     (start-process-shell-command 
+      "offlineimap"
+      "offlineimap"
+      "offlineimap -o && notmuch new")
+     (start-process-shell-command
+      "notmuch"
+      "notmuch"
+      (concat "notmuch tag +sent -- from:" user-mail-address)))
 #+END_SRC
 [[https://notmuchmail.org/][Notmuch]] is an email-client. We only load the package when the =notmuch= command
 is called. You need to install the =notmuch= and =notmuch-emacs= packages with
@@ -560,6 +565,14 @@ use to send email - the smtp server has to be configured in =private.el=. We
 tell that =notmuch= needs =gnutls-cli= and =notmuch=.
 #+BEGIN_SRC emacs-lisp
   (use-package notmuch 
+    :custom-face
+    (widget-field
+     ((t
+       (:box
+        (:line-width
+         (1 . 1)
+         :color nil :style none)
+        :foreground "#ECEFF4" :background "#242832"))))
     :init (update-mail)
     :ensure nil
     :commands (notmuch notmuch-mua-new-mail)
@@ -567,6 +580,7 @@ tell that =notmuch= needs =gnutls-cli= and =notmuch=.
     ((gnutls-cli . gnutls-bin)
       notmuch)
     :custom 
+    (notmuch-show-logo nil)
     (message-send-mail-function 'smtpmail-send-it)
     (mail-send-mail-function 'smtpmail-send-it)
     (message-auto-save-directory "~/.mail/draft")
@@ -617,14 +631,9 @@ The [[https://github.com/emacs-evil/evil-magit][evil-magit]] package provides ev
     :after (magit evil))
 #+END_SRC
 The [[https://github.com/apchamberlain/undo-tree.el][undo-tree]] package provides a more traditional undo system without loosing
-information about past states of the buffer. Enable persistant buffer undo and
-compress the history.
+information about past states of the buffer. Enable persistent buffer undo.
 #+BEGIN_SRC emacs-lisp
   (use-package undo-tree
-    :config
-    (defadvice undo-tree-make-history-save-file-name
-        (after undo-tree activate)
-      (setq ad-return-value (concat ad-return-value ".gz")))
     :custom
     (undo-tree-auto-save-history t)
     (undo-limit 10000)
