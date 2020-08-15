@@ -28,6 +28,7 @@
 - [[#keybindings][Keybindings]]
   - [[#evil][Evil]]
   - [[#avy][Avy]]
+  - [[#anzu][Anzu]]
   - [[#general][General]]
 
 * Introduction
@@ -573,9 +574,23 @@ tell that =notmuch= needs =gnutls-cli= and =notmuch=.
     (message-directory "~/.mail"))
 #+END_SRC
 ** Eww
-We set =eww= as the default web browser to use.
+We set =eww= as the default web browser to use. We also customize a bit the look
+so it looks more coherent with the rest of the configuration.
 #+BEGIN_SRC emacs-lisp
-  (setq browse-url-browser-function 'eww-browse-url)
+  (use-package eww
+    :ensure nil
+    :commands (eww)
+    :custom-face
+    (eww-form-submit ((t (:inherit custom-button))))
+    (eww-valid-certificate ((t (:weight bold :foreground "#A3BE8C"))))
+    (eww-form-text
+     ((t
+       (:box
+        (:line-width
+         (1 . 1)
+         :color nil :style none)
+        :foreground "#ECEFF4" :background "#242832"))))
+    :custom (browse-url-browser-function 'eww-browse-url))
 #+END_SRC 
 * Keybindings
 ** Evil
@@ -622,6 +637,12 @@ The [[https://github.com/abo-abo/avy][avy]] package provides a way to move in th
 tree.
 #+BEGIN_SRC emacs-lisp
   (use-package avy)
+#+END_SRC
+** Anzu
+#+BEGIN_SRC emacs-lisp
+  (use-package anzu
+    :custom-face
+    (anzu-mode-line ((t (:foreground "#EBCB8B")))))
 #+END_SRC
 ** General
 The [[https://github.com/noctuid/general.el][general]] package provides an easy way to bind keys and integrates well with
