@@ -44,7 +44,7 @@ own private.el. You have to set up the user mail address and elfeed feeds.
 #+BEGIN_SRC emacs-lisp
   (load "~/.emacs.d/private.el")
 #+END_SRC
-** Performance 1/2
+** Performance 1
 We disable the garbage collector at launch time to improve performances.
 #+BEGIN_SRC emacs-lisp
   (setq gc-cons-threshold most-positive-fixnum
@@ -90,15 +90,6 @@ The [[https://github.com/rranelli/auto-package-update.el][auto-package-update]] 
     (setq auto-package-update-delete-old-versions t)
     (setq auto-package-update-hide-results t)
     (auto-package-update-maybe))
-#+END_SRC
-** Performance 2/2
-The [[https://gitlab.com/koral/gcmh][gcmh]] package provides more garbage collector related optimizations, but we
-need our package manager to install it so we can't install it with the other
-optimizations.
-#+BEGIN_SRC emacs-lisp
-  (use-package gcmh
-    :init
-    (gcmh-mode 1))
 #+END_SRC
 ** Security
 First, make emacs verify all TLS connections.
@@ -480,14 +471,12 @@ internal error reporting mechanism and replace it by a one which uses flycheck.
     (flycheck-ocaml-setup))
 #+END_SRC
 *** Common Lisp
-The [[https://github.com/joaotavora/sly][sly]] package provides Common Lisp IDE features.
+The [[https://github.com/slime/slime][SLIME]] package provides Common Lisp IDE features.
 #+BEGIN_SRC emacs-lisp
-  (use-package slime
-    :custom (inferior-lisp-program "sbcl"))
 #+END_SRC
+The [[https://github.com/anwyn/slime-company][slime-company]] package a company backend for the SLIME package.
 #+BEGIN_SRC emacs-lisp
-  (use-package slime-company
-    :config (slime-setup '(slime-company)))
+  (use-package sly)
 #+END_SRC
 *** Org
 Unable auto fill in org mode to make paragraphs of 80 lines automaticlly. We
