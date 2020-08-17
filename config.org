@@ -1,6 +1,7 @@
 #+TITLE:My confiuration
 * Table of Content                                                      :TOC:
 - [[#introduction][Introduction]]
+  - [[#lexical-binding][Lexical Binding]]
   - [[#private-configuration][Private configuration]]
   - [[#performance-12][Performance 1/2]]
   - [[#package-management][Package management]]
@@ -32,6 +33,11 @@
   - [[#general][General]]
 
 * Introduction
+** Lexical Binding
+Enabling lexical binding improves performance.
+#+BEGIN_SRC emacs-lisp
+  ;;; init.el --- -*- lexical-binding: t -*-
+#+END_SRC
 ** Private configuration
 First of all, we load the private config that you have to set yourself, in your
 own private.el. You have to set up the user mail address and elfeed feeds.
@@ -41,8 +47,8 @@ own private.el. You have to set up the user mail address and elfeed feeds.
 ** Performance 1/2
 We disable the garbage collector at launch time to improve performances.
 #+BEGIN_SRC emacs-lisp
-(setq gc-cons-threshold most-positive-fixnum
-      gc-cons-percentage 0.6)
+  (setq gc-cons-threshold most-positive-fixnum
+        gc-cons-percentage 0.6)
 #+END_SRC
 After startup, we set it back to a 16MB threshold.
 #+BEGIN_SRC emacs-lisp
@@ -55,15 +61,14 @@ After startup, we set it back to a 16MB threshold.
 We add the [[https://melpa.org/#/][melpa]] package archive which contains most of emacs packages.
 #+BEGIN_SRC emacs-lisp
   (require 'package)
-  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+  (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
   (package-initialize)
 #+END_SRC
 The [[https://github.com/jwiegley/use-package][use-package]] package provides an easier way to configure and install package,
 we load it since it's already installed as a git submodule.
 #+BEGIN_SRC emacs-lisp
-  (eval-when-compile
-    (add-to-list 'load-path "~/.emacs.d/use-package")
-    (require 'use-package))
+  (add-to-list 'load-path "~/.emacs.d/use-package")
+  (require 'use-package)
 #+END_SRC
 Then we tell =use-package= to check if a package is installed and install it if
 it's not unless we told it not to.
@@ -474,6 +479,16 @@ internal error reporting mechanism and replace it by a one which uses flycheck.
     (setq merlin-error-after-save nil)
     (flycheck-ocaml-setup))
 #+END_SRC
+*** Common Lisp
+The [[https://github.com/joaotavora/sly][sly]] package provides Common Lisp IDE features.
+#+BEGIN_SRC emacs-lisp
+  (use-package slime
+    :custom (inferior-lisp-program "sbcl"))
+#+END_SRC
+#+BEGIN_SRC emacs-lisp
+  (use-package slime-company
+    :config (slime-setup '(slime-company)))
+#+END_SRC
 *** Org
 Unable auto fill in org mode to make paragraphs of 80 lines automaticlly. We
 only load the =emacs-lisp= backend of literate programming with org-mode.
@@ -538,12 +553,13 @@ tell that elfeed needs =curl=.
 #+BEGIN_SRC emacs-lisp
   (use-package elfeed
     :ensure-system-package (curl)
-    :init (elfeed-update)
+    :config (elfeed-update)
     :commands (elfeed))
 #+END_SRC
 ** Notmuch
 First of all, we create a function to update the mail box, by downloading and
-indexing new emails. We also tag each email sent by the user with a special tag.
+indexing new emails using =notmuch= and =offlineimap=. We also tag each email
+sent by the user with a special tag.
 #+BEGIN_SRC emacs-lisp
    (defun update-mail ()
      "Update offlineimap and notmuch."
@@ -573,12 +589,12 @@ tell that =notmuch= needs =gnutls-cli= and =notmuch=.
          (1 . 1)
          :color nil :style none)
         :foreground "#ECEFF4" :background "#242832"))))
-    :init (update-mail)
+    :config (update-mail)
     :ensure nil
     :commands (notmuch notmuch-mua-new-mail)
     :ensure-system-package 
     ((gnutls-cli . gnutls-bin)
-      notmuch)
+      notmuch offlineimap)
     :custom 
     (notmuch-show-logo nil)
     (message-send-mail-function 'smtpmail-send-it)
@@ -648,8 +664,10 @@ tree.
   (use-package avy)
 #+END_SRC
 ** Anzu
+The [[https://github.com/emacsorphanage/anzu][anzu]] package provides search information for various modes in the mode line.
 #+BEGIN_SRC emacs-lisp
   (use-package anzu
+    :config (global-anzu-mode)
     :custom-face
     (anzu-mode-line ((t (:foreground "#EBCB8B")))))
 #+END_SRC
@@ -673,7 +691,7 @@ evil would bind the space key.
     "ff"  'find-file
     "bb"  'counsel-switch-buffer
     "fr"  'counsel-recentf
-    "hj"  'counsel-flycheck
+    "kl"  'counsel-flycheck
     "cr"  'comment-region
     "cc"  'comment-line
     "gc"  'magit-commit
