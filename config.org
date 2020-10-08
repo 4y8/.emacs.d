@@ -3,9 +3,8 @@
 - [[#introduction][Introduction]]
   - [[#lexical-binding][Lexical Binding]]
   - [[#private-configuration][Private configuration]]
-  - [[#performance-12][Performance 1/2]]
+  - [[#performance-1][Performance 1]]
   - [[#package-management][Package management]]
-  - [[#performance-22][Performance 2/2]]
   - [[#security][Security]]
   - [[#miscellaneous][Miscellaneous]]
 - [[#aesthetic-changes][Aesthetic changes]]
@@ -61,7 +60,7 @@ After startup, we set it back to a 16MB threshold.
 We add the [[https://melpa.org/#/][melpa]] package archive which contains most of emacs packages.
 #+BEGIN_SRC emacs-lisp
   (require 'package)
-  (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
   (package-initialize)
 #+END_SRC
 The [[https://github.com/jwiegley/use-package][use-package]] package provides an easier way to configure and install package,
@@ -334,7 +333,7 @@ Replace flycheck's default fringe with a bitmap arrow.
             #b11000000
             #b10000000)
     nil nil 'center)
-  (flycheck-redefine-standard-error-levels nil 'flycheck-error-bmp)
+  ;(flycheck-redefine-standard-error-levels nil 'flycheck-error-bmp)
 #+END_SRC
 *** Company
 The [[https://github.com/company-mode/company-mode][company]] package provides in buffer auto-completion. We tell it to start
@@ -452,6 +451,12 @@ backends, so we load it after these packages.
     (add-to-list 'company-backends 'merlin-company-backend)
     :hook
     ((caml-mode tuareg-mode) . merlin-mode))
+
+  (let ((opam-share (ignore-errors (car (process-lines "opam" "config" "var" "share")))))
+   (when (and opam-share (file-directory-p opam-share))
+    (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share))
+    (autoload 'merlin-mode "merlin" nil t nil)
+    ))
 #+END_SRC
 We can get documentation from ocaml files using the merlin backend of eldoc.
 #+BEGIN_SRC emacs-lisp
@@ -476,7 +481,7 @@ The [[https://github.com/slime/slime][SLIME]] package provides Common Lisp IDE f
 #+END_SRC
 The [[https://github.com/anwyn/slime-company][slime-company]] package a company backend for the SLIME package.
 #+BEGIN_SRC emacs-lisp
-  (use-package sly)
+;  (use-package sly)
 #+END_SRC
 *** Org
 Unable auto fill in org mode to make paragraphs of 80 lines automaticlly. We
