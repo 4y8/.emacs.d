@@ -333,7 +333,7 @@ Replace flycheck's default fringe with a bitmap arrow.
             #b11000000
             #b10000000)
     nil nil 'center)
-  ;(flycheck-redefine-standard-error-levels nil 'flycheck-error-bmp)
+  (flycheck-redefine-standard-error-levels nil 'flycheck-error-bmp)
 #+END_SRC
 *** Company
 The [[https://github.com/company-mode/company-mode][company]] package provides in buffer auto-completion. We tell it to start
@@ -451,12 +451,6 @@ backends, so we load it after these packages.
     (add-to-list 'company-backends 'merlin-company-backend)
     :hook
     ((caml-mode tuareg-mode) . merlin-mode))
-
-  (let ((opam-share (ignore-errors (car (process-lines "opam" "config" "var" "share")))))
-   (when (and opam-share (file-directory-p opam-share))
-    (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share))
-    (autoload 'merlin-mode "merlin" nil t nil)
-    ))
 #+END_SRC
 We can get documentation from ocaml files using the merlin backend of eldoc.
 #+BEGIN_SRC emacs-lisp
