@@ -62,6 +62,7 @@ We add the [[https://melpa.org/#/][melpa]] package archive which contains most o
   (require 'package)
   (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
   (package-initialize)
+  (setenv "PATH" (concat (getenv "PATH") (concat (concat ":" (getenv "HOME")) "/go/bin")))
 #+END_SRC
 The [[https://github.com/jwiegley/use-package][use-package]] package provides an easier way to configure and install package,
 we load it since it's already installed as a git submodule.
@@ -423,7 +424,7 @@ We add summon this function when saving a c file.
     (interactive)
     (add-hook 'before-save-hook 'uncrustify nil t))
 
-  (add-hook 'c-mode-hook 'uncrustify-on-save)
+  ;(add-hook 'c-mode-hook 'uncrustify-on-save)
 #+END_SRC
 **** CMake
 The [[https://github.com/Lindydancer/cmake-font-lock/tree/9e0fcd1ee2cf316f661f2d652368b12f83a4ec9c][cmake-font-lock]] package provides advanced syntax highlighting for CMake
@@ -569,14 +570,14 @@ use to send email - the smtp server has to be configured in =private.el=. We
 tell that =notmuch= needs =gnutls-cli= and =notmuch=.
 #+BEGIN_SRC emacs-lisp
   (use-package notmuch 
-    :custom-face
-    (widget-field
-     ((t
-       (:box
-        (:line-width
-         (1 . 1)
-         :color nil :style none)
-        :foreground "#ECEFF4" :background "#242832"))))
+  ;;  :custom-face
+  ;;  (widget-field
+  ;;   ((t
+  ;;     (:box
+  ;;      (:line-width
+  ;;      (1 . 1)
+  ;;       :color nil :style none)
+  ;;      :foreground "#ECEFF4" :background "#242832"))))
     :config (update-mail)
     :ensure nil
     :commands (notmuch notmuch-mua-new-mail)
@@ -628,11 +629,6 @@ Evil. We already modified company keybindings so we disable evil' one.
   :custom (evil-collection-company-use-tng nil)
   :config
   (evil-collection-init))
-#+END_SRC
-The [[https://github.com/emacs-evil/evil-magit][evil-magit]] package provides evil keybindings for magit.
-#+BEGIN_SRC emacs-lisp
-  (use-package evil-magit
-    :after (magit evil))
 #+END_SRC
 The [[https://github.com/apchamberlain/undo-tree.el][undo-tree]] package provides a more traditional undo system without loosing
 information about past states of the buffer. Enable persistent buffer undo.
